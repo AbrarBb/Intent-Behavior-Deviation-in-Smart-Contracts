@@ -1,0 +1,3 @@
+contract_id,intent_text,intent_label,behavior_label,final_label,reviewer_notes
+001,Users can safely withdraw funds,safe_withdraw,owner_withdraw,rugpull,example row only — replace with your review
+002,Users fully control funds,user_control,user_control,safe,example row only
