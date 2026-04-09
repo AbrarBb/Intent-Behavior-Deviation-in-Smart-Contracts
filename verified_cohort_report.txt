@@ -1,0 +1,23 @@
+Verified-source cohort report
+============================================================
+
+All addresses (from dataset_manifest.csv):
+  Total rows:                      4606
+  With verified source on disk:   3324
+  Without source:                 1282
+
+FULL verified cohort (true class counts - use for primary reporting):
+  label=0 (benign arm):           1022
+  label=1 (malicious arm):       2302
+  Total analyzable:              3324
+  Imbalance ratio (max/min):     2.2524
+
+Output: verified_manifest.csv
+
+BALANCED verified cohort (seed=42, n per class = 1022):
+  label=0:                         1022
+  label=1:                         1022
+  Total rows:                      2044
+Output: verified_manifest_balanced_seed42.csv
+
+Note: balanced file drops abs(c0-c1) contracts from the majority class; report both tables in the paper.

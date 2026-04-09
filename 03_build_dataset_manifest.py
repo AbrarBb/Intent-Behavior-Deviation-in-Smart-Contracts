@@ -60,6 +60,7 @@ def main() -> None:
     print(f"  With .sol on disk:        {n_ok}")
     print(f"  Missing / unverified:     {n_total - n_ok}")
     print(f"  Written: {OUTPUT_CSV}")
+    print("  Next: run 10_verified_source_cohorts.py for full vs balanced verified CSVs + report.")
     print("=" * 60)
 
 

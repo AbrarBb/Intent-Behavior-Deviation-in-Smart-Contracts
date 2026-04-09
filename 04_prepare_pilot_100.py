@@ -13,6 +13,7 @@ For publication, treat ``manual_annotations.csv`` (your reviewed copy) as ground
 
 from __future__ import annotations
 
+import argparse
 import shutil
 from pathlib import Path
 
@@ -21,7 +22,9 @@ import pandas as pd
 from solidity_extract import extract_nat_spec_and_comments, extract_function_names
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-MANIFEST_CSV = SCRIPT_DIR / "dataset_manifest.csv"
+DEFAULT_MANIFEST = SCRIPT_DIR / "dataset_manifest.csv"
+VERIFIED_MANIFEST = SCRIPT_DIR / "verified_manifest.csv"
+VERIFIED_BALANCED = SCRIPT_DIR / "verified_manifest_balanced_seed42.csv"
 PILOT_ROOT = SCRIPT_DIR / "pilot_data"
 PILOT_MANIFEST = SCRIPT_DIR / "pilot_manifest.csv"
 SEED_ANNOTATIONS = SCRIPT_DIR / "manual_annotations_seed.csv"
@@ -30,7 +33,43 @@ RNG = 42
 
 
 def main() -> None:
-    df = pd.read_csv(MANIFEST_CSV)
+    ap = argparse.ArgumentParser(
+        description="Build pilot_data/ and annotation seed from a manifest CSV.",
+    )
+    ap.add_argument(
+        "--manifest",
+        type=Path,
+        default=None,
+        help="Path to manifest CSV (default: dataset_manifest.csv).",
+    )
+    ap.add_argument(
+        "--from-verified-full",
+        action="store_true",
+        help=f"Use {VERIFIED_MANIFEST.name} (run 10 first).",
+    )
+    ap.add_argument(
+        "--from-verified-balanced",
+        action="store_true",
+        help=f"Use {VERIFIED_BALANCED.name} (run 10 first).",
+    )
+    args = ap.parse_args()
+
+    if args.from_verified_full and args.from_verified_balanced:
+        raise SystemExit("Use at most one of --from-verified-full / --from-verified-balanced.")
+
+    if args.from_verified_full:
+        manifest_path = VERIFIED_MANIFEST
+    elif args.from_verified_balanced:
+        manifest_path = VERIFIED_BALANCED
+    elif args.manifest is not None:
+        manifest_path = Path(args.manifest).resolve()
+    else:
+        manifest_path = DEFAULT_MANIFEST
+
+    if not manifest_path.is_file():
+        raise SystemExit(f"Manifest not found: {manifest_path}")
+
+    df = pd.read_csv(manifest_path)
     ok = df[df["has_verified_source"] == 1].copy()
     if ok.empty:
         raise SystemExit("No rows with has_verified_source=1. Run Phase 2–3 first.")
@@ -107,6 +146,7 @@ def main() -> None:
     print("=" * 60)
     print(f"  Contracts: {len(rows)}  (target up to {2 * N_PER_CLASS})")
     print(f"  Root: {PILOT_ROOT}")
+    print(f"  Source manifest: {manifest_path.name}")
     print(f"  Manifest: {PILOT_MANIFEST}")
     print(f"  Annotations seed: {SEED_ANNOTATIONS}")
     print("  Next: copy seed to manual_annotations.csv, edit labels, then run 05-08.")
