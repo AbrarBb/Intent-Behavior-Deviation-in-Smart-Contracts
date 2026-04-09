@@ -115,7 +115,7 @@ All scripts resolve paths relative to **the directory containing the script**, s
 
 ---
 
-## Input data (you provide)
+## Input data (collected)
 
 1. **`rugpull_full_dataset_new (1).csv`**  
    - Header row required.  
