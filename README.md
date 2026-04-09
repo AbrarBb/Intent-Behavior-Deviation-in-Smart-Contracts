@@ -8,21 +8,22 @@ Reproducible data preparation and research utilities for studying **rug-pull–s
 
 1. [Research framing](#research-framing)
 2. [Contribution and novelty](#contribution-and-novelty)
-3. [Prerequisites](#prerequisites)
-4. [Repository layout](#repository-layout)
-5. [Input data](#input-data-you-provide)
-6. [Pipeline overview](#pipeline-overview)
-7. [Phase-by-phase usage](#phase-by-phase-usage)
-8. [Etherscan API (V2)](#etherscan-api-v2)
-9. [Outputs and artifacts (summary table)](#outputs-and-artifacts-summary-table)
-10. [Output schemas (columns and how they help)](#output-schemas-columns-and-how-they-help)
-11. [Training and evaluation (how to train models)](#training-and-evaluation-how-to-train-models)
-12. [Reproducibility](#reproducibility)
-13. [Limitations and disclosure](#limitations-and-disclosure)
-14. [Security notes](#security-notes)
-15. [License and citation](#license-and-citation)
+3. [Latest results](#latest-results)
+4. [Prerequisites](#prerequisites)
+5. [Repository layout](#repository-layout)
+6. [Input data](#input-data-you-provide)
+7. [Pipeline overview](#pipeline-overview)
+8. [Phase-by-phase usage](#phase-by-phase-usage)
+9. [Etherscan API (V2)](#etherscan-api-v2)
+10. [Outputs and artifacts (summary table)](#outputs-and-artifacts-summary-table)
+11. [Output schemas (columns and how they help)](#output-schemas-columns-and-how-they-help)
+12. [Training and evaluation (how to train models)](#training-and-evaluation-how-to-train-models)
+13. [Reproducibility](#reproducibility)
+14. [Limitations and disclosure](#limitations-and-disclosure)
+15. [Security notes](#security-notes)
+16. [License and citation](#license-and-citation)
 
-16. [Paper completion package (Q1)](#paper-completion-package-q1)
+17. [Paper completion package (Q1)](#paper-completion-package-q1)
 
 ---
 
@@ -39,12 +40,71 @@ Structured materials for writing and submission (see the roadmap in `docs/`):
 | [docs/REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md) | Environment, citations, Zenodo placeholder |
 | [docs/MANUSCRIPT_STRUCTURE.md](docs/MANUSCRIPT_STRUCTURE.md) | Section outline and venue shortlist |
 | [docs/METHODOLOGY.md](docs/METHODOLOGY.md) | Full methodology (Methods section) with script and artifact mapping |
+| [docs/PROJECT_EXECUTION_REPORT.md](docs/PROJECT_EXECUTION_REPORT.md) | End-to-end execution story: what was done, findings, next phases |
+| [docs/STAGE2_WORKFLOW.md](docs/STAGE2_WORKFLOW.md) | Stage 2 Slither-enabled full-corpus build and post-build analysis workflow |
+| [docs/PAPER_NARRATIVE.md](docs/PAPER_NARRATIVE.md) | Narrative framing and contribution story for the paper |
+| [docs/NEXT_PHASE.md](docs/NEXT_PHASE.md) | Recommended next phases and roadmap |
 | [requirements-frozen.txt](requirements-frozen.txt) | Pinned dependencies from `pip freeze` (regenerate before archive) |
 | [11_run_ablation_experiments.py](11_run_ablation_experiments.py) | Hybrid / intent / behavior / no-Slither ablations → `artifacts/ablation_report.md` |
 
 `manual_annotations.csv` is the working annotation file (initialized from the seed); replace labels after human review per `docs/ANNOTATION_PROTOCOL.md`.
 
 **Phase 4** optional flags: `--from-verified-full`, `--from-verified-balanced`, or `--manifest path/to.csv`.
+
+---
+
+## Latest results
+
+> Results from the **Stage 2 Slither-enabled full-corpus build** (`12_build_verified_full_ml_dataset.py --enable-slither`) on the verified-source cohort.
+
+### Corpus statistics
+
+| Metric | Value |
+|--------|-------|
+| Total addresses in master dataset | 4,606 |
+| Addresses with verified Solidity source | **3,324** |
+| Addresses without source | 1,282 |
+| Full verified cohort — benign (label = 0) | 1,022 |
+| Full verified cohort — malicious (label = 1) | 2,302 |
+| Imbalance ratio (max / min) | 2.25 |
+| Balanced verified subset (seed 42) | 1,022 per class = **2,044** total |
+| Slither OK (out of 3,324) | **3,095 (93.1 %)** |
+| Slither failed (compile / remap edge cases) | 229 (6.9 %) |
+
+See `verified_cohort_report.txt` and `artifacts/ml_dataset_verified_full_config.json` for the full breakdown.
+
+### Formal verified-full ablation (5-fold stratified CV, Random Forest)
+
+Run with [`15_ablation_study.py`](15_ablation_study.py) on `artifacts/ml_dataset_verified_full.csv` (N = 3 324, Slither-enabled):
+
+| Modality | Feature space | Mean F1 (rugpull) | Mean ROC-AUC |
+|----------|--------------|------------------:|-------------:|
+| Intent-only | 384-d MiniLM embeddings | **0.9852** | 0.9952 |
+| Behavior-only | 14 tabular flags (Slither + regex) | **0.9531** | 0.9640 |
+| Hybrid | Intent + Behavior (398-d) | **0.9848** | 0.9951 |
+
+**Interpretation:**
+
+- Enabling Slither raised **behavior-only F1 from ~0.69 (regex-only baseline) to ~0.95**—static analysis signal is real and substantial.
+- **Intent embeddings** reach the ceiling on this corpus; **Hybrid ≈ Intent-only** on F1 (small negative delta vs intent alone).
+- Frame the paper contribution around **modality analysis** (intent vs behavior vs hybrid) and **Slither coverage**, not "hybrid always wins."
+
+### Pilot ablation (Phase 11, N = 100)
+
+| Modality | Best model | Hold-out F1 | 5-fold CV F1 |
+|----------|-----------|------------:|-------------:|
+| Hybrid (384-d intent + 14 behavior) | Random Forest | 0.9600 | 0.9628 ± 0.034 |
+| Intent-only | Random Forest | 0.9600 | 0.9628 ± 0.034 |
+| Behavior-only (14 columns) | Logistic Regression | 0.5882 | 0.7147 ± 0.063 |
+| Hybrid, no Slither detectors | Random Forest | 0.9600 | 0.9628 ± 0.034 |
+
+See [`artifacts/ablation_report.md`](artifacts/ablation_report.md) and [`artifacts/ablation_results.json`](artifacts/ablation_results.json) for full per-model confusion matrices.
+
+### Feature importance (MDI, verified-full Random Forest)
+
+Top-20 features remain **embedding dimensions** (`emb_*`); aggregate MDI mass is **~99.8 % intent / ~0.2 % behavior**. This is expected MDI bias (many continuous embedding dims vs 14 tabular flags). **Always pair MDI with the ablation table** above—do not cite MDI alone as evidence that behavior does not matter.
+
+Full diagnostics: [`tools/post_stage2_diagnostics.py`](tools/post_stage2_diagnostics.py).
 
 ---
 
@@ -100,18 +160,24 @@ All scripts resolve paths relative to **the directory containing the script**, s
 | `04_prepare_pilot_100.py` | Pilot: 100 contracts, `code.sol` / `text.txt` / `functions.txt`. |
 | `05_embed_intent.py` | Sentence-BERT embeddings for intent text. |
 | `06_extract_behavior_features.py` | Slither JSON + regex behavior features. |
+| `06b_extract_enriched_behavior_features.py` | Extended regex heuristics (optional enriched behavior block). |
 | `07_build_ml_dataset.py` | Merge embeddings + features + labels → `ml_dataset.npz`. |
 | `08_train_models.py` | Sklearn baselines; saves `best_model.joblib`. |
 | `09_export_kaggle_csvs.py` | Flat CSVs for Kaggle / supplementary material. |
 | `10_verified_source_cohorts.py` | Full verified CSV + seed-42 balanced verified CSV + cohort report. |
 | `11_run_ablation_experiments.py` | Ablation metrics → `artifacts/ablation_report.md`, `ablation_results.json`. |
-| `docs/*.md` | Paper: contributions, protocol, cohorts, threats, reproducibility, outline. |
+| `12_build_verified_full_ml_dataset.py` | **Stage 2:** full-corpus ML dataset from `verified_manifest.csv` (Slither-enabled). |
+| `13_train_verified_full_models.py` | Train baselines on `ml_dataset_verified_full.npz`; saves `best_model_verified_full.joblib`. |
+| `14_feature_importance.py` | MDI feature importance for verified-full Random Forest + intent vs behavior aggregate share. |
+| `15_ablation_study.py` | Formal 5-fold CV ablation (intent-only / behavior-only / hybrid) on verified-full data. |
+| `docs/*.md` | Paper: contributions, protocol, cohorts, threats, reproducibility, outline, execution report, Stage 2 workflow. |
 | `solidity_extract.py` | Shared comment / function extraction and regex flags. |
 | `streamlit_app.py` | Prototype scorer (intent + code paste). |
+| `tools/` | Post-Stage 2 diagnostics (`post_stage2_diagnostics.py`) and artifact backup scripts. |
 | `manual_annotations.template.csv` | Schema example for human annotations. |
 | `pilot_data/` | Standardized per-contract folders (after Phase 4). |
 | `raw_data/` | Downloaded `.sol` trees (after Phase 2). |
-| `artifacts/` | Embeddings, behavior CSVs, NPZ/CSV ML tables, trained model. |
+| `artifacts/` | Embeddings, behavior CSVs, NPZ/CSV ML tables, trained models, ablation outputs. |
 
 ---
 
@@ -143,8 +209,15 @@ If benign rows are insufficient, Phase 1 raises a clear error.
            --> 06 behavior_features.csv
            --> 07 ml_dataset.npz (+ meta CSV)
            --> 09 ml_dataset.csv + intent_vectors.csv (optional)
-           --> 08 trained model
+           --> 08 trained model (best_model.joblib)
+           --> 11 ablation_report.md + ablation_results.json
            --> streamlit_app.py (demo)
+
+[Stage 2 — verified-full large-scale pipeline]
+           --> 12 ml_dataset_verified_full.{npz,csv} + config.json (--enable-slither)
+           --> 13 best_model_verified_full.joblib
+           --> 14 feature importance (MDI, intent vs behavior share)
+           --> 15 formal ablation (intent-only / behavior-only / hybrid, 5-fold CV)
 ```
 
 ---
@@ -304,6 +377,67 @@ Writes **`artifacts/intent_vectors.csv`** and **`artifacts/ml_dataset.csv`** (wi
 
 ---
 
+### Phase 12: Verified-full ML dataset (Stage 2 — large-scale)
+
+```bash
+# Without Slither (fast, regex-only behavior)
+python 12_build_verified_full_ml_dataset.py
+
+# With Slither (recommended for paper; requires slither + solc-select)
+python 12_build_verified_full_ml_dataset.py --enable-slither
+
+# Smoke test (never overwrites canonical artifacts)
+python 12_build_verified_full_ml_dataset.py --max-contracts 50 --output-tag smoke50 --no-csv
+```
+
+Reads **`verified_manifest.csv`** (3 324 rows); runs Sentence-BERT embedding + behavior extraction on every contract. With `--enable-slither`, runs Slither per file using pragma-chained `solc-select`; **`--slither-skip-solc-install`** skips auto-install of solc versions. Optional `--enable-enriched-features` appends extended regex heuristics from `06b_extract_enriched_behavior_features.py`.
+
+**Outputs** (canonical stem `ml_dataset_verified_full`):
+- `artifacts/ml_dataset_verified_full.npz` — primary training bundle
+- `artifacts/ml_dataset_verified_full.csv` — Kaggle-friendly flat table
+- `artifacts/ml_dataset_verified_full_meta.csv` — human-readable metadata
+- `artifacts/ml_dataset_verified_full_config.json` — build parameters + Slither counts
+
+**Duration:** several minutes (regex-only) to 1–3+ hours (Slither-enabled, full 3 324 contracts).
+
+> Always **backup** canonical artifacts before any re-run: `./tools/backup_verified_full_artifacts.ps1` (PowerShell on Windows)
+
+---
+
+### Phase 13: Verified-full model training
+
+```bash
+python 13_train_verified_full_models.py
+# Custom NPZ:
+python 13_train_verified_full_models.py --npz artifacts/ml_dataset_verified_full_smoke50.npz
+```
+
+Same model family and evaluation protocol as Phase 8 but loads `ml_dataset_verified_full.npz`. Saves **`artifacts/best_model_verified_full.joblib`**.
+
+---
+
+### Phase 14: Feature importance (MDI)
+
+```bash
+python 14_feature_importance.py
+```
+
+Retrains a Random Forest on `ml_dataset_verified_full.csv`; reports **Top-20 features** and the aggregate **intent vs behavior MDI share**. Pair with Phase 15 ablation for the paper; MDI alone is biased toward high-cardinality continuous features (embedding dims).
+
+---
+
+### Phase 15: Formal ablation study
+
+```bash
+python 15_ablation_study.py
+# Explicit CSV path:
+python 15_ablation_study.py --csv artifacts/ml_dataset_verified_full.csv
+```
+
+Runs **stratified 5-fold CV** (Random Forest) on three modality settings: **Intent-only**, **Behavior-only**, **Hybrid**. Reports **mean F1** (rugpull positive class) and **mean ROC-AUC** for each. This is the primary modality evidence table for the paper.
+
+---
+
 ### Prototype UI
 
 ```bash
@@ -345,9 +479,14 @@ See Etherscan’s [V2 migration](https://docs.etherscan.io/v2-migration) documen
 | `artifacts/ml_dataset.npz` | Primary training bundle: `X`, `y`, `contract_id`, `feature_cols`. |
 | `artifacts/intent_vectors.csv` | Wide CSV: `contract_id` + `emb_000`…`emb_383` (+ optional JSON column). |
 | `artifacts/ml_dataset.csv` | Kaggle-friendly flat table: embeddings + behavior + `target` / `target_label`. |
-| `artifacts/best_model.joblib` | `{"model": fitted_estimator, "name": str}` chosen by hold-out F1. |
-| `artifacts/ablation_report.md` | Ablation F1 / CV / confusion matrices (Phase 11). |
-| `artifacts/ablation_results.json` | Machine-readable ablation results. |
+| `artifacts/best_model.joblib` | `{"model": fitted_estimator, "name": str}` chosen by hold-out F1 (pilot). |
+| `artifacts/ablation_report.md` | Ablation F1 / CV / confusion matrices (Phase 11, pilot N=100). |
+| `artifacts/ablation_results.json` | Machine-readable ablation results (pilot). |
+| `artifacts/ml_dataset_verified_full.npz` | **Stage 2** primary training bundle (N=3 324, Slither-enabled). |
+| `artifacts/ml_dataset_verified_full.csv` | **Stage 2** Kaggle-friendly flat table. |
+| `artifacts/ml_dataset_verified_full_meta.csv` | **Stage 2** human-readable metadata. |
+| `artifacts/ml_dataset_verified_full_config.json` | Build config: n_contracts, Slither OK/fail counts, feature_cols, solc versions. |
+| `artifacts/best_model_verified_full.joblib` | Best model trained on verified-full NPZ (Phase 13). |
 
 ---
 
@@ -512,7 +651,11 @@ Run from the repository root:
 | Merge | `python 07_build_ml_dataset.py` (add `--use-seed` if still using only the seed file) | `artifacts/ml_dataset.npz`, `ml_dataset_meta.csv` |
 | Export (optional) | `python 09_export_kaggle_csvs.py` | `ml_dataset.csv`, `intent_vectors.csv` |
 | Train | `python 08_train_models.py` | `artifacts/best_model.joblib`, console metrics |
-| Ablations | `python 11_run_ablation_experiments.py` | `artifacts/ablation_report.md`, `ablation_results.json` |
+| Ablations (pilot) | `python 11_run_ablation_experiments.py` | `artifacts/ablation_report.md`, `ablation_results.json` |
+| **Stage 2 build** | `python 12_build_verified_full_ml_dataset.py --enable-slither` | `artifacts/ml_dataset_verified_full.*` |
+| Stage 2 train | `python 13_train_verified_full_models.py` | `artifacts/best_model_verified_full.joblib` |
+| Feature importance | `python 14_feature_importance.py` | Console MDI table |
+| **Formal ablation** | `python 15_ablation_study.py` | Console ablation table (F1 + AUC per modality) |
 
 ### 3. What the trainer does (for Methods section)
 
