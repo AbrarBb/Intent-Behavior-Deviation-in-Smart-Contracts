@@ -61,14 +61,14 @@ Structured materials for writing and submission (see the roadmap in `docs/`):
 
 | Metric | Value |
 |--------|-------|
-| Total addresses in master dataset | 4 606 |
-| Addresses with verified Solidity source | **3 324** |
-| Addresses without source | 1 282 |
-| Full verified cohort — benign (label = 0) | 1 022 |
-| Full verified cohort — malicious (label = 1) | 2 302 |
+| Total addresses in master dataset | 4,606 |
+| Addresses with verified Solidity source | **3,324** |
+| Addresses without source | 1,282 |
+| Full verified cohort — benign (label = 0) | 1,022 |
+| Full verified cohort — malicious (label = 1) | 2,302 |
 | Imbalance ratio (max / min) | 2.25 |
-| Balanced verified subset (seed 42) | 1 022 per class = **2 044** total |
-| Slither OK (out of 3 324) | **3 095 (93.1 %)** |
+| Balanced verified subset (seed 42) | 1,022 per class = **2,044** total |
+| Slither OK (out of 3,324) | **3,095 (93.1 %)** |
 | Slither failed (compile / remap edge cases) | 229 (6.9 %) |
 
 See `verified_cohort_report.txt` and `artifacts/ml_dataset_verified_full_config.json` for the full breakdown.
@@ -400,7 +400,7 @@ Reads **`verified_manifest.csv`** (3 324 rows); runs Sentence-BERT embedding + b
 
 **Duration:** several minutes (regex-only) to 1–3+ hours (Slither-enabled, full 3 324 contracts).
 
-> Always **backup** canonical artifacts before any re-run: `.\tools\backup_verified_full_artifacts.ps1`
+> Always **backup** canonical artifacts before any re-run: `./tools/backup_verified_full_artifacts.ps1` (PowerShell on Windows)
 
 ---
 
