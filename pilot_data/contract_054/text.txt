@@ -1,0 +1,9 @@
+// solhint-disable-next-line avoid-low-level-calls
+// Look for revert reason and bubble it up if present
+// The easiest way to bubble the revert reason is using memory via assembly
+// solhint-disable-next-line no-inline-assembly
+//-----------------------------------------------------------------------------------------------------------------------//
+//MultiEmit
+//MultiEmit
+//Disable permission
+//Approve Spending

@@ -1,0 +1,29 @@
+/**
+
+     * @dev See {IERC20-totalSupply}.
+
+     */
+/**
+
+     * @dev See {IERC20-balanceOf}.
+
+     */
+/**
+
+     * @dev See {IERC20-transfer}.
+
+     *
+
+     * Requirements:
+
+     *
+
+     * - `recipient` cannot be the zero address.
+
+     * - the caller must have a balance of at least `amount`.
+
+     */
+// Solidity only automatically asserts when dividing by 0
+// assert(a == b * c + a % b); // There is no case in which this doesn't hold
+// solhint-disable-next-line no-inline-assembly
+// solhint-disable-next-line avoid-low-level-calls, avoid-call-value

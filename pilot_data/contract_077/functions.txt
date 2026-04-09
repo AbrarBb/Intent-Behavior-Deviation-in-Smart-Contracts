@@ -1,0 +1,13 @@
+totalSupply
+balanceOf
+transfer
+transferFrom
+approve
+allowance
+transfer
+transferFrom
+balanceOf
+approve
+allowance
+HumanStandardToken
+approveAndCall

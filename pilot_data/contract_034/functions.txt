@@ -1,0 +1,14 @@
+sub
+add
+receiveApproval
+transferOwnership
+TokenERC20
+batchTransfer
+_transfer
+transfer
+transferFrom
+approve
+freezeAccount
+approveAndCall
+burn
+burnFrom

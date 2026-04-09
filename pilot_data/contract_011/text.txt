@@ -1,0 +1,20 @@
+/**
+
+SUCHI is a serpent like creature from the darkness of the underwater creatures that we dont see....
+
+
+
+*/
+/////////////////////////////////////////////
+///////////////////////////////////////////
+////////////////////////////////////////////////
+// SPDX-License-Identifier: Unlicensed
+//Original Fee
+//
+//Trade start check
+//Transfer Tokens
+//Set Fee for Buys
+//Set Fee for Sells
+//Set minimum tokens required to swap.
+//Set minimum tokens required to swap.
+//Set maximum transaction

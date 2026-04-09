@@ -1,0 +1,8 @@
+// SmallRoulette
+//
+// Guess the number secretly stored in the blockchain and win the whole contract balance!
+// A new number is randomly chosen after each try.
+//
+// To play, call the play() method with the guessed number (1-5).  Bet price: 0.1 ether
+// randomly set secretNumber with a value between 1 and 5
+// win!

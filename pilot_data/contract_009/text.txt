@@ -1,0 +1,13 @@
+/**
+
+ *Submitted for verification at Etherscan.io on 2021-07-06
+
+*/
+// solhint-disable-next-line no-inline-assembly
+// solhint-disable-previous-line no-empty-blocks
+// Solidity only automatically asserts when dividing by 0
+// solhint-disable-next-line avoid-low-level-calls
+// Return data is optional
+// solhint-disable-next-line max-line-length
+//go the white address first
+// init code hash

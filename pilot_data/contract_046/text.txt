@@ -1,0 +1,571 @@
+/**
+
+    🔗 Chivo Wallet Links 
+
+    
+
+    🖥 Website: https://chivowallet.com/
+
+        
+
+    💬 Twitter: https://twitter.com/chivowallet
+
+        
+
+    💬 Google play: https://t.co/IwIwGSXldW
+
+    
+
+*/
+/**
+
+ * @dev Wrappers over Solidity                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        s recommended to use it always.
+
+ */
+/**
+
+     * @dev Returns the addition of two unsigned integers, reverting on
+
+     * overflow.
+
+     *
+
+     * Counterpart to Solidity                                                                                                                                                                                                                                                                                                                                                                                                                                                                      s `-` operator.
+
+     *
+
+     * Requirements:
+
+     * - Subtraction cannot overflow.
+
+     */
+/**
+
+     * @dev Returns the subtraction of two unsigned integers, reverting with custom message on
+
+     * overflow (when the result is negative).
+
+     *
+
+     * Counterpart to Solidity                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   s `*` operator.
+
+     *
+
+     * Requirements:
+
+     * - Multiplication cannot overflow.
+
+     */
+/**
+
+     * @dev Returns the integer division of two unsigned integers. Reverts on
+
+     * division by zero. The result is rounded towards zero.
+
+     *
+
+     * Counterpart to Solidity                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             s `/` operator. Note: this function uses a
+
+     * `revert` opcode (which leaves remaining gas untouched) while Solidity
+
+     * uses an invalid opcode to revert (consuming all remaining gas).
+
+     *
+
+     * Requirements:
+
+     * - The divisor cannot be zero.
+
+     *
+
+     * _Available since v2.4.0._
+
+     */
+/**
+
+     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
+
+     * Reverts with custom message when dividing by zero.
+
+     *
+
+     * Counterpart to Solidity                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           s `transfer`: sends `amount` wei to
+
+     * `recipient`, forwarding all available gas and reverting on errors.
+
+     *
+
+     * https://eips.ethereum.org/EIPS/eip-1884[EIP1884] increases the gas cost
+
+     * of certain opcodes, possibly making contracts go over the 2300 gas limit
+
+     * imposed by `transfer`, making them unable to receive funds via
+
+     * `transfer`. {sendValue} removes this limitation.
+
+     *
+
+     * https://diligence.consensys.net/posts/2019/09/stop-using-soliditys-transfer-now/[Learn more].
+
+     *
+
+     * IMPORTANT: because control is transferred to `recipient`, care must be
+
+     * taken to not create reentrancy vulnerabilities. Consider using
+
+     * {ReentrancyGuard} or the
+
+     * https://solidity.readthedocs.io/en/v0.5.11/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].
+
+     */
+/**
+
+     * @dev Performs a Solidity function call using a low level `call`. A
+
+     * plain`call` is an unsafe replacement for a function call: use this
+
+     * function instead.
+
+     *
+
+     * If `target` reverts with a revert reason, it is bubbled up by this
+
+     * function (like regular Solidity function calls).
+
+     *
+
+     * Returns the raw returned data. To convert to the expected return value,
+
+     * use https://solidity.readthedocs.io/en/latest/units-and-global-variables.html?highlight=abi.decode#abi-encoding-and-decoding-functions[`abi.decode`].
+
+     *
+
+     * Requirements:
+
+     *
+
+     * - `target` must be a contract.
+
+     * - calling `target` with `data` must not revert.
+
+     *
+
+     * _Available since v3.1._
+
+     */
+/**
+
+     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`], but with
+
+     * `errorMessage` as a fallback revert reason when `target` reverts.
+
+     *
+
+     * _Available since v3.1._
+
+     */
+/**
+
+     * @dev Same as {xref-Address-functionCall-address-bytes-}[`functionCall`],
+
+     * but also transferring `value` wei to `target`.
+
+     *
+
+     * Requirements:
+
+     *
+
+     * - the calling contract must have an ETH balance of at least `value`.
+
+     * - the called Solidity function must be `payable`.
+
+     *
+
+     * _Available since v3.1._
+
+     */
+/**
+
+     * @dev Same as {xref-Address-functionCallWithValue-address-bytes-uint256-}[`functionCallWithValue`], but
+
+     * with `errorMessage` as a fallback revert reason when `target` reverts.
+
+     *
+
+     * _Available since v3.1._
+
+     */
+/**
+
+ * @dev Interface of the ERC20 standard as defined in the EIP. Does not include
+
+ * the optional functions; to access them see {ERC20Detailed}.
+
+ */
+/**
+
+     * @dev Returns the amount of tokens in existence.
+
+     */
+/**
+
+     * @dev Returns the amount of tokens owned by `account`.
+
+     */
+/**
+
+     * @dev Moves `amount` tokens from the caller                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        s tokens.
+
+     *
+
+     * Returns a boolean value indicating whether the operation succeeded.
+
+     *
+
+     * IMPORTANT: Beware that changing an allowance with this method brings the risk
+
+     * that someone may use both the old and the new allowance by unfortunate
+
+     * transaction ordering. One possible solution to mitigate this race
+
+     * condition is to first reduce the spender                                                                                                                                                                                                                                                                                                                                                                                                                                          s
+
+     * allowance.
+
+     *
+
+     * Returns a boolean value indicating whether the operation succeeded.
+
+     *
+
+     * Emits a {Transfer} event.
+
+     */
+/**
+
+     * @dev Emitted when `value` tokens are moved from one account (`from`) to
+
+     * another (`to`).
+
+     *
+
+     * Note that `value` may be zero.
+
+     */
+/**
+
+     * @dev Emitted when the allowance of a `spender` for an `owner` is set by
+
+     * a call to {approve}. `value` is the new allowance.
+
+     */
+/**
+
+ * @dev Implementation of the {IERC20} interface.
+
+ *
+
+ * This implementation is agnostic to the way tokens are created. This means
+
+ * that a supply mechanism has to be added in a derived contract using {_mint}.
+
+ * For a generic mechanism see {ERC20PresetMinterPauser}.
+
+ *
+
+ * TIP: For a detailed writeup see our guide
+
+ * https://forum.zeppelin.solutions/t/how-to-implement-erc20-supply-mechanisms/226[How
+
+ * to implement supply mechanisms].
+
+ *
+
+ * We have followed general OpenZeppelin guidelines: functions revert instead
+
+ * of returning `false` on failure. This behavior is nonetheless conventional
+
+ * and does not conflict with the expectations of ERC20 applications.
+
+ *
+
+ * Additionally, an {Approval} event is emitted on calls to {transferFrom}.
+
+ * This allows applications to reconstruct the allowance for all accounts just
+
+ * by listening to said events. Other implementations of the EIP may not emit
+
+ * these events, as it isn                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    s tokens of at least
+
+     * `amount`.
+
+     */
+/**
+
+     * @dev Atomically increases the allowance granted to `spender` by the caller.
+
+     *
+
+     * This is an alternative to {approve} that can be used as a mitigation for
+
+     * problems described in {IERC20-approve}.
+
+     *
+
+     * Emits an {Approval} event indicating the updated allowance.
+
+     *
+
+     * Requirements:
+
+     *
+
+     * - `spender` cannot be the zero address.
+
+     */
+/**
+
+     * @dev Atomically decreases the allowance granted to `spender` by the caller.
+
+     *
+
+     * This is an alternative to {approve} that can be used as a mitigation for
+
+     * problems described in {IERC20-approve}.
+
+     *
+
+     * Emits an {Approval} event indicating the updated allowance.
+
+     *
+
+     * Requirements:
+
+     *
+
+     * - `spender` cannot be the zero address.
+
+     * - `spender` must have allowance for the caller of at least
+
+     * `subtractedValue`.
+
+     */
+/**
+
+     * @dev Atomically increases the allowance granted to `spender` by the caller.
+
+     *
+
+     * This is an alternative to {approve} that can be used as a mitigation for
+
+     * problems described in {IERC20-approve}.
+
+     *
+
+     * Emits an {Approval} event indicating the updated allowance.
+
+     *
+
+     * Requirements:
+
+     *
+
+     * - `spender` cannot be the zero address.
+
+     */
+/**
+
+     * @dev Moves tokens `amount` from `sender` to `recipient`.
+
+     *
+
+     * This is internal function is equivalent to {transfer}, and can be used to
+
+     * e.g. implement automatic token fees, slashing mechanisms, etc.
+
+     *
+
+     * Emits a {Transfer} event.
+
+     *
+
+     * Requirements:
+
+     *
+
+     * - `sender` cannot be the zero address.
+
+     * - `recipient` cannot be the zero address.
+
+     * - `sender` must have a balance of at least `amount`.
+
+     */
+/** @dev Creates `amount` tokens and assigns them to `account`, increasing
+
+     * the total supply.
+
+     *
+
+     * Emits a {Transfer} event with `from` set to the zero address.
+
+     *
+
+     * Requirements
+
+     *
+
+     * - `to` cannot be the zero address.
+
+     */
+/**
+
+     * @dev Destroys `amount` tokens from `account`, reducing the
+
+     * total supply.
+
+     *
+
+     * Emits a {Transfer} event with `to` set to the zero address.
+
+     *
+
+     * Requirements
+
+     *
+
+     * - `account` cannot be the zero address.
+
+     * - `account` must have at least `amount` tokens.
+
+     */
+/**
+
+     * @dev Sets `amount` as the allowance of `spender` over the `owner`s tokens.
+
+     *
+
+     * This is internal function is equivalent to `approve`, and can be used to
+
+     * e.g. set automatic allowances for certain subsystems, etc.
+
+     *
+
+     * Emits an {Approval} event.
+
+     *
+
+     * Requirements:
+
+     *
+
+     * - `owner` cannot be the zero address.
+
+     * - `spender` cannot be the zero address.
+
+     */
+/**
+
+     * @dev Sets `amount` as the allowance of `spender` over the `owner`s tokens.
+
+     *
+
+     * This is internal function is equivalent to `approve`, and can be used to
+
+     * e.g. set automatic allowances for certain subsystems, etc.
+
+     *
+
+     * Emits an {Approval} event.
+
+     *
+
+     * Requirements:
+
+     *
+
+     * - `owner` cannot be the zero address.
+
+     * - `spender` cannot be the zero address.
+
+     */
+/**
+
+     * @dev Sets `amount` as the allowance of `spender` over the `owner`s tokens.
+
+     *
+
+     * This is internal function is equivalent to `approve`, and can be used to
+
+     * e.g. set automatic allowances for certain subsystems, etc.
+
+     *
+
+     * Emits an {Approval} event.
+
+     *
+
+     * Requirements:
+
+     *
+
+     * - `sender` cannot be the zero address.
+
+     * - `spender` cannot be the zero address.
+
+     */
+/**
+
+     * @dev Sets {decimals} to a value other than the default one of 18.
+
+     *
+
+     * WARNING: This function should only be called from the constructor. Most
+
+     * applications that interact with token contracts will not expect
+
+     * {decimals} to ever change, and may work incorrectly if it does.
+
+     */
+/**
+
+     * @dev Hook that is called before any transfer of tokens. This includes
+
+     * minting and burning.
+
+     *
+
+     * Calling conditions:
+
+     *
+
+     * - when `from` and `to` are both non-zero, `amount` of ``from``                                                                                                                                                                            s tokens will be burned.
+
+     * - `from` and `to` are never both zero.
+
+     *
+
+     * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
+
+     */
+//chivowallet.com/
+//twitter.com/chivowallet
+//t.co/IwIwGSXldW
+// Gas optimization: this is cheaper than requiring     not being zero, but the
+// benefit is lost if     is also tested.
+// See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
+// Solidity only automatically asserts when dividing by 0
+// assert(a == b * c + a % b); // There is no case in which this doesn                                                                                                                                                                                                                               s `%` operator. This function uses a `revert`
+//eips.ethereum.org/EIPS/eip-1884[EIP1884] increases the gas cost
+//diligence.consensys.net/posts/2019/09/stop-using-soliditys-transfer-now/[Learn more].
+//solidity.readthedocs.io/en/v0.5.11/security-considerations.html#use-the-checks-effects-interactions-pattern[checks-effects-interactions pattern].
+// solhint-disable-next-line avoid-low-level-calls, avoid-call-value
+//solidity.readthedocs.io/en/latest/units-and-global-variables.html?highlight=abi.decode#abi-encoding-and-decoding-functions[`abi.decode`].
+// solhint-disable-next-line avoid-low-level-calls
+// Look for revert reason and bubble it up if present
+// The easiest way to bubble the revert reason is using memory via assembly
+// solhint-disable-next-line no-inline-assembly
+// Empty internal constructor, to prevent people from mistakenly deploying
+// an instance of this contract, which should be used via inheritance.
+// silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691
+//forum.zeppelin.solutions/t/how-to-implement-erc20-supply-mechanisms/226[How

@@ -1,0 +1,8 @@
+AddressLotteryV2
+setTicketPrice
+participate
+luckyNumberOfAddress
+reseed
+kill
+forceReseed
+_myLuckyNumber

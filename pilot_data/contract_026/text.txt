@@ -1,0 +1,50 @@
+/**
+
+       .:
+
+      / )
+
+     ( (
+
+      \ )
+
+    ._(/_.
+
+    |___%|
+
+     | %|
+
+     | %|
+
+     | %|
+
+    .|_%|.
+
+    | ()%|
+
+ .__|___%|__.
+
+ |      ___%|_
+
+ |_____(____  )
+
+           ( (
+
+            \                          ._______.-
+
+
+
+
+
+https://bunsenburnerinu.com	
+
+https://t.me/bunsenburnerinu	
+
+https://twitter.com/Bunsenburnerinu
+
+*/
+//bunsenburnerinu.com
+//t.me/bunsenburnerinu
+//twitter.com/Bunsenburnerinu
+// SPDX-License-Identifier: UNLICENSED
+// Cooldown

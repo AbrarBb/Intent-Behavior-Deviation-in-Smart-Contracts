@@ -1,0 +1,4 @@
+GetHash
+SetPass
+GetGift
+PassHasBeenSet

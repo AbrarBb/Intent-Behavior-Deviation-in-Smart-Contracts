@@ -1,0 +1,22 @@
+/**
+
+$ OPINU - Optimism Inu
+
+
+
+Optimism is bring the optimistic vibe back in town. All hail the great Optimism.
+
+
+
+https://opinu.top	
+
+https://t.me/opinuportal	
+
+https://twitter.com/opinuerc20
+
+*/
+//opinu.top
+//t.me/opinuportal
+//twitter.com/opinuerc20
+// SPDX-License-Identifier: UNLICENSED
+// Cooldown

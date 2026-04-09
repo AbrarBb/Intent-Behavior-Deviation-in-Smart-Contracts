@@ -1,0 +1,32 @@
+/**
+
+     ______     ______     ______     ______     ______    
+
+    /\  == \   /\  == \   /\  __ \   /\___  \   /\  __ \   
+
+    \ \  __<   \ \  __<   \ \ \/\ \  \/_/  /__  \ \ \/\ \  
+
+     \ \_____\  \ \_\ \_\  \ \_____\   /\_____\  \ \_____\ 
+
+      \/_____/   \/_/ /_/   \/_____/   \/_____/   \/_____/ 
+
+                  
+
+      Website: https://brozo.finance
+
+
+
+     Telegram: https://t.me/brozotoken
+
+
+
+               @brozotoken
+
+
+
+*/
+// SPDX-License-Identifier: MIT
+//brozo.finance
+//t.me/brozotoken
+// on buy
+// Halve the amount of liquidity tokens

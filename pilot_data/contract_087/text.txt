@@ -1,0 +1,61 @@
+/**
+
+
+
+██████╗ ██████╗ ███████╗ █████╗ ███████╗████████╗
+
+██╔══██╗██╔══██╗██╔════╝██╔══██╗██╔════╝╚══██╔══╝
+
+██████╔╝██████╔╝█████╗  ███████║███████╗   ██║   
+
+██╔══██╗██╔══██╗██╔══╝  ██╔══██║╚════██║   ██║   
+
+██████╔╝██║  ██║███████╗██║  ██║███████║   ██║   
+
+╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝   ╚═╝  
+
+
+
+Every purchase helps against the war on Breast Cancer, join us in our mission to support survivors and help fund research that will help cure breat cancer.
+
+
+
+#FuckCancer
+
+Tele: t.me/breastcoin
+
+Website: breastcoin.site
+
+
+
+Donation Link:
+
+https://www.littlepink.org/donors/give-online/crypto/
+
+
+
+*/
+// SPDX-License-Identifier: MIT
+//www.littlepink.org/donors/give-online/crypto/
+//
+//
+//Buy Fee
+//
+//
+//Sell Fee
+//
+//
+//Original Fee
+//
+//
+//
+//
+//
+//
+//Trade start check
+//Transfer Tokens
+//Set Fee for Buys
+//Set Fee for Sells
+//Set minimum tokens required to swap.
+//Set minimum tokens required to swap.
+//Set maximum transaction

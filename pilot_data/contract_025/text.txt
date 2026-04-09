@@ -1,0 +1,242 @@
+/**
+
+ * Contract that exposes the needed erc20 token functions
+
+ */
+/**
+
+ * Contract that will forward any incoming Ether to its creator
+
+ */
+/**
+
+   * Create the contract, and set the destination address to that of the creator
+
+   */
+/**
+
+   * Modifier that will execute internal code block only if the sender is a parent of the forwarder contract
+
+   */
+/**
+
+   * Default function; Gets called when Ether is deposited, and forwards it to the destination address
+
+   */
+/**
+
+   * Execute a token transfer of the full balance from the forwarder token to the main wallet contract
+
+   * @param tokenContractAddress the address of the erc20 token contract
+
+   */
+/**
+
+   * It is possible that funds were sent to this address before the contract was deployed.
+
+   * We can flush those funds to the destination address.
+
+   */
+/**
+
+ * Basic multi-signer wallet designed for use in a co-signing environment where 2 signatures are required to move funds.
+
+ * Typically used in a 2-of-3 signing configuration. Uses ecrecover to allow for 2 signatures in a single transaction.
+
+ */
+/**
+
+   * Modifier that will execute internal code block only if the sender is an authorized signer on this wallet
+
+   */
+/**
+
+   * Set up a simple multi-sig wallet by specifying the signers allowed to be used on this wallet.
+
+   * 2 signers will be required to send a transaction from this wallet.
+
+   * Note: The sender is NOT automatically added to the list of signers.
+
+   * Signers CANNOT be changed once they are set
+
+   *
+
+   * @param allowedSigners An array of signers on the wallet
+
+   */
+/**
+
+   * Gets called when a transaction is received without calling a method
+
+   */
+/**
+
+   * Create a new contract (and also address) that forwards funds to this contract
+
+   * returns address of newly created forwarder address
+
+   */
+/**
+
+   * Execute a multi-signature transaction from this wallet using 2 signers: one from msg.sender and the other from ecrecover.
+
+   * The signature is a signed form (using eth.sign) of tightly packed toAddress, value, data, expireTime and sequenceId
+
+   * Sequence IDs are numbers starting from 1. They are used to prevent replay attacks and may not be repeated.
+
+   *
+
+   * @param toAddress the destination address to send an outgoing transaction
+
+   * @param value the amount in Wei to be sent
+
+   * @param data the data to send to the toAddress when invoking the transaction
+
+   * @param expireTime the number of seconds since 1970 for which this transaction is valid
+
+   * @param sequenceId the unique sequence id obtainable from getNextSequenceId
+
+   * @param signature the result of eth.sign on the operationHash sha3(toAddress, value, data, expireTime, sequenceId)
+
+   */
+/**
+
+   * Execute a multi-signature token transfer from this wallet using 2 signers: one from msg.sender and the other from ecrecover.
+
+   * The signature is a signed form (using eth.sign) of tightly packed toAddress, value, tokenContractAddress, expireTime and sequenceId
+
+   * Sequence IDs are numbers starting from 1. They are used to prevent replay attacks and may not be repeated.
+
+   *
+
+   * @param toAddress the destination address to send an outgoing transaction
+
+   * @param value the amount in tokens to be sent
+
+   * @param tokenContractAddress the address of the erc20 token contract
+
+   * @param expireTime the number of seconds since 1970 for which this transaction is valid
+
+   * @param sequenceId the unique sequence id obtainable from getNextSequenceId
+
+   * @param signature the result of eth.sign on the operationHash sha3(toAddress, value, tokenContractAddress, expireTime, sequenceId)
+
+   */
+/**
+
+   * Execute a token flush from one of the forwarder addresses. This transfer needs only a single signature and can be done by any signer
+
+   *
+
+   * @param forwarderAddress the address of the forwarder address to flush the tokens from
+
+   * @param tokenContractAddress the address of the erc20 token contract
+
+   */
+/**
+
+   * Do common multisig verification for both eth sends and erc20token transfers
+
+   *
+
+   * @param toAddress the destination address to send an outgoing transaction
+
+   * @param operationHash the sha3 of the toAddress, value, data/tokenContractAddress and expireTime
+
+   * @param signature the tightly packed signature of r, s, and v as an array of 65 bytes (returned by eth.sign)
+
+   * @param expireTime the number of seconds since 1970 for which this transaction is valid
+
+   * @param sequenceId the unique sequence id obtainable from getNextSequenceId
+
+   * returns address of the address to send tokens or eth to
+
+   */
+/**
+
+   * Irrevocably puts contract into safe mode. When in this mode, transactions may only be sent to signing addresses.
+
+   */
+/**
+
+   * Determine if an address is a signer on this wallet
+
+   * @param signer address to check
+
+   * returns boolean indicating whether address is signer or not
+
+   */
+/**
+
+   * Gets the second signer's address using ecrecover
+
+   * @param operationHash the sha3 of the toAddress, value, data/tokenContractAddress and expireTime
+
+   * @param signature the tightly packed signature of r, s, and v as an array of 65 bytes (returned by eth.sign)
+
+   * returns address recovered from the signature
+
+   */
+/**
+
+   * Verify that the sequence id has not been used before and inserts it. Throws if the sequence ID was not accepted.
+
+   * We collect a window of up to 10 recent sequence ids, and allow any sequence id that is not in the window and
+
+   * greater than the minimum element in the window.
+
+   * @param sequenceId to insert into array of stored ids
+
+   */
+/**
+
+   * Gets the next available sequence ID for signing when using executeAndConfirm
+
+   * returns the sequenceId one higher than the highest currently stored
+
+   */
+// Send _value amount of tokens to address _to
+// Get the account balance of another account with address _owner
+// Address to which any funds sent to this contract will be forwarded
+// The contract address of the token
+// Amount of token sent
+// Fire off the deposited event if we can forward it
+// Events
+// Address of the sender of the message initiating the transaction
+// Address of the signer (second signature) used to initiate the transaction
+// Operation hash (sha3 of toAddress, value, data, expireTime, sequenceId)
+// The address the transaction was sent to
+// Amount of Wei sent to the address
+// Data sent when invoking the transaction
+// Address of the sender of the message initiating the transaction
+// Address of the signer (second signature) used to initiate the transaction
+// Operation hash (sha3 of toAddress, value, tokenContractAddress, expireTime, sequenceId)
+// The address the transaction was sent to
+// Amount of token sent
+// The contract address of the token
+// Public fields
+// The addresses that can co-sign transactions on the wallet
+// When active, wallet may only send to signer addresses
+// Internal fields
+// Invalid number of signers
+// Fire deposited event if we are receiving funds
+// Verify the other signer
+// Success, send the transaction
+// Failed executing transaction
+// Verify the other signer
+// Verify if we are in safe mode. In safe mode, the wallet can only send to signers
+// We are in safe mode and the toAddress is not a signer. Disallow!
+// Verify that the transaction has not expired
+// Transaction expired
+// Try to insert the sequence ID. Will throw if the sequence id was invalid
+// Other signer not on this wallet or operation does not match arguments
+// Cannot approve own transaction
+// Iterate through all signers on the wallet and
+// We need to unpack the signature, which is given as an array of 65 bytes (from eth.sign)
+// Ethereum versions are 27 or 28 as opposed to 0 or 1 which is submitted by some signing libs
+// Keep a pointer to the lowest value element in the window
+// This sequence ID has been used before. Disallow!
+// The sequence ID being used is lower than the lowest value in the window
+// so we cannot accept it as it may have been used before
+// Block sequence IDs which are much higher than the lowest value
+// This prevents people blocking the contract by using very large sequence IDs quickly

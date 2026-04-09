@@ -1,0 +1,4 @@
+//t.me/balerioninu
+// SPDX-License-Identifier: MIT
+// RFI
+// Bot detection

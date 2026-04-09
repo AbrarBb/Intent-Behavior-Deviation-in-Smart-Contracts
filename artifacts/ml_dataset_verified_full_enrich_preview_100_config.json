@@ -1,0 +1,87 @@
+{
+  "manifest": "verified_manifest.csv",
+  "output_stem": "ml_dataset_verified_full_enrich_preview_100",
+  "n_contracts": 100,
+  "kept_contracts": 100,
+  "total_contracts": 100,
+  "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "emb_dim": 384,
+  "max_intent_chars": 8000,
+  "batch_size": 64,
+  "device": "cpu",
+  "feature_cols": [
+    "owner_withdraw",
+    "emergency_withdraw",
+    "unrestricted_mint",
+    "regex_owner_withdraw",
+    "regex_emergency_withdraw",
+    "regex_unrestricted_mint",
+    "slither_ok",
+    "slither_high_count",
+    "slither_arbitrary_send",
+    "slither_suicidal",
+    "slither_unchecked_lowlevel",
+    "slither_controlled_delegatecall",
+    "slither_delegatecall_loop",
+    "slither_ownerish_any",
+    "approve_restricted_to_owner",
+    "transfer_restricted",
+    "burn_restricted",
+    "liquidity_removal_guarded",
+    "unguarded_public_state_mutation",
+    "owner_hardcoded",
+    "has_selfdestruct_or_delegatecall",
+    "asymmetric_liquidity_flow",
+    "has_fallback",
+    "liquidity_asymmetric_no_remove"
+  ],
+  "base_feature_cols": [
+    "owner_withdraw",
+    "emergency_withdraw",
+    "unrestricted_mint",
+    "regex_owner_withdraw",
+    "regex_emergency_withdraw",
+    "regex_unrestricted_mint",
+    "slither_ok",
+    "slither_high_count",
+    "slither_arbitrary_send",
+    "slither_suicidal",
+    "slither_unchecked_lowlevel",
+    "slither_controlled_delegatecall",
+    "slither_delegatecall_loop",
+    "slither_ownerish_any"
+  ],
+  "enriched_features_enabled": true,
+  "slither_enabled": false,
+  "slither_timeout_sec": 180,
+  "slither_skip_solc_install": false,
+  "solc_select_versions": [
+    "0.4.26",
+    "0.5.17",
+    "0.6.12",
+    "0.7.6",
+    "0.8.13",
+    "0.8.20",
+    "0.8.28"
+  ],
+  "pragma_solc_chains": {
+    "0.8.13": [
+      "0.8.13",
+      "0.8.20",
+      "0.8.28"
+    ],
+    "0.8.20": [
+      "0.8.20",
+      "0.8.28"
+    ],
+    "0.8.0": [
+      "0.8.28",
+      "0.8.20",
+      "0.8.13"
+    ]
+  },
+  "slither_ok_count": 0,
+  "slither_fail_count": 0,
+  "max_contracts_cap": 100,
+  "output_tag": "enrich_preview_100"
+}

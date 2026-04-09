@@ -1,0 +1,4 @@
+SmallRoulette
+shuffle
+play
+kill

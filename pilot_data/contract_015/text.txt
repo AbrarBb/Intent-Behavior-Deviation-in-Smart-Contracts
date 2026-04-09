@@ -1,0 +1,4 @@
+// This function is called every time someone sends ether to this contract
+// Bidders that have been outbid can call this to retrieve their ETH
+// For winner (or creator if no bids) to retrieve badge
+// For auction creator to retrieve ETH 1 day after auction ends

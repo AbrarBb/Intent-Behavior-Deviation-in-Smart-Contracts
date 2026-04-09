@@ -1,0 +1,58 @@
+{
+  "manifest": "verified_manifest.csv",
+  "n_contracts": 3324,
+  "kept_contracts": 3324,
+  "total_contracts": 3324,
+  "embedding_model": "sentence-transformers/all-MiniLM-L6-v2",
+  "emb_dim": 384,
+  "max_intent_chars": 8000,
+  "batch_size": 64,
+  "device": "cpu",
+  "feature_cols": [
+    "owner_withdraw",
+    "emergency_withdraw",
+    "unrestricted_mint",
+    "regex_owner_withdraw",
+    "regex_emergency_withdraw",
+    "regex_unrestricted_mint",
+    "slither_ok",
+    "slither_high_count",
+    "slither_arbitrary_send",
+    "slither_suicidal",
+    "slither_unchecked_lowlevel",
+    "slither_controlled_delegatecall",
+    "slither_delegatecall_loop",
+    "slither_ownerish_any"
+  ],
+  "slither_enabled": true,
+  "slither_timeout_sec": 180,
+  "slither_skip_solc_install": true,
+  "solc_select_versions": [
+    "0.4.26",
+    "0.5.17",
+    "0.6.12",
+    "0.7.6",
+    "0.8.13",
+    "0.8.20",
+    "0.8.28"
+  ],
+  "pragma_solc_chains": {
+    "0.8.13": [
+      "0.8.13",
+      "0.8.20",
+      "0.8.28"
+    ],
+    "0.8.20": [
+      "0.8.20",
+      "0.8.28"
+    ],
+    "0.8.0": [
+      "0.8.28",
+      "0.8.20",
+      "0.8.13"
+    ]
+  },
+  "slither_ok_count": 3095,
+  "slither_fail_count": 229,
+  "max_contracts_cap": 0
+}

@@ -1,0 +1,341 @@
+/**
+
+
+
+Website:  https://www.cimbo.org
+
+
+
+Telegram: https://t.me/cimbo_token
+
+
+
+Twitter:  https://twitter.com/Cimbotoken
+
+
+
+WhitePaper: https://www.cimbo.org/images/whitepaper.pdf
+
+
+
+*/
+/**
+
+     * @dev Returns the subtraction of two unsigned integers, reverting on
+
+     * overflow (when the result is negative).
+
+     *
+
+     * Counterpart to Solidity                                                                                                                                                                                                                                                                                                                                                                                                                                                        s `-` operator.
+
+     *
+
+     * Requirements:
+
+     *
+
+     * - Subtraction cannot overflow.
+
+     */
+/**
+
+     * @dev Returns the addition of two unsigned integers, reverting on
+
+     * overflow.
+
+     *
+
+     * Counterpart to Solidity                                                                                                                                                                                                                                                                                                                                                                                                                                                   s `*` operator.
+
+     *
+
+     * Requirements:
+
+     *
+
+     * - Multiplication cannot overflow.
+
+     */
+/**
+
+     * @dev Returns the integer division of two unsigned integers. Reverts on
+
+     * division by zero. The result is rounded towards zero.
+
+     *
+
+     * Counterpart to Solidity                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     s `/` operator. Note: this function uses a
+
+     * `revert` opcode (which leaves remaining gas untouched) while Solidity
+
+     * uses an invalid opcode to revert (consuming all remaining gas).
+
+     *
+
+     * Requirements:
+
+     *
+
+     * - The divisor cannot be zero.
+
+     */
+/**
+
+     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
+
+     * Reverts with custom message when dividing by zero.
+
+     *
+
+     * Counterpart to Solidity                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      s account to `recipient`.
+
+     *
+
+     * Returns a boolean value indicating whether the operation succeeded.
+
+     *
+
+     * Emits a {Transfer} event.
+
+     */
+/**
+
+     * @dev Returns the remaining number of tokens that `spender` will be
+
+     * allowed to spend on behalf of `owner` through {transferFrom}. This is
+
+     * zero by default.
+
+     *
+
+     * This value changes when {approve} or {transferFrom} are called.
+
+     */
+/**
+
+     * @dev Sets `amount` as the allowance of `spender` over the caller                                                                                                                                                                                                                                                                                                                                                                                                       s allowance to 0 and set the
+
+     * desired value afterwards:
+
+     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+
+     *
+
+     * Emits an {Approval} event.
+
+     */
+/**
+
+     * @dev Moves `amount` tokens from `sender` to `recipient` using the
+
+     * allowance mechanism. `amount` is then deducted from the caller                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            s tokens of at least
+
+     * `amount`.
+
+     */
+/**
+
+     * @dev Atomically increases the allowance granted to `spender` by the caller.
+
+     *
+
+     * This is an alternative to {approve} that can be used as a mitigation for
+
+     * problems described in {IERC20-approve}.
+
+     *
+
+     * Emits an {Approval} event indicating the updated allowance.
+
+     *
+
+     * Requirements:
+
+     *
+
+     * - `spender` cannot be the zero address.
+
+     */
+/**
+
+     * @dev Atomically decreases the allowance granted to `spender` by the caller.
+
+     *
+
+     * This is an alternative to {approve} that can be used as a mitigation for
+
+     * problems described in {IERC20-approve}.
+
+     *
+
+     * Emits an {Approval} event indicating the updated allowance.
+
+     *
+
+     * Requirements:
+
+     *
+
+     * - `spender` cannot be the zero address.
+
+     * - `spender` must have allowance for the caller of at least
+
+     * `subtractedValue`.
+
+     */
+/**
+
+     * @dev Moves tokens `amount` from `sender` to `recipient`.
+
+     *
+
+     * This is internal function is equivalent to {transfer}, and can be used to
+
+     * e.g. implement automatic token fees, slashing mechanisms, etc.
+
+     *
+
+     * Emits a {Transfer} event.
+
+     *
+
+     * Requirements:
+
+     *
+
+     * - `sender` cannot be the zero address.
+
+     * - `recipient` cannot be the zero address.
+
+     * - `sender` must have a balance of at least `amount`.
+
+     */
+/** @dev Creates `amount` tokens and assigns them to `account`, increasing
+
+     * the total supply.
+
+     *
+
+     * Emits a {Transfer} event with `from` set to the zero address.
+
+     *
+
+     * Requirements:
+
+     *
+
+     * - `account` cannot be the zero address.
+
+     */
+/**
+
+     * @dev Destroys `amount` tokens from `account`, reducing the
+
+     * total supply.
+
+     *
+
+     * Emits a {Transfer} event with `to` set to the zero address.
+
+     *
+
+     * Requirements:
+
+     *
+
+     * - `account` cannot be the zero address.
+
+     * - `account` must have at least `amount` tokens.
+
+     */
+/**
+
+     * @dev Sets `amount` as the allowance of `spender` over the `owner` s tokens.
+
+     *
+
+     * This internal function is equivalent to `approve`, and can be used to
+
+     * e.g. set automatic allowances for certain subsystems, etc.
+
+     *
+
+     * Emits an {Approval} event.
+
+     *
+
+     * Requirements:
+
+     *
+
+     * - `owner` cannot be the zero address.
+
+     * - `spender` cannot be the zero address.
+
+     */
+/**
+
+     * @dev Hook that is called before any transfer of tokens. This includes
+
+     * minting and burning.
+
+     *
+
+     * Calling conditions:
+
+     *
+
+     * - when `from` and `to` are both non-zero, `amount` of ``from``                                                                                                                                                                            s tokens will be burned.
+
+     * - `from` and `to` are never both zero.
+
+     *
+
+     * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
+
+     */
+/**
+
+     * @dev Multiplies two int256 variables and fails on overflow.
+
+     */
+/**
+
+     * @dev Division of two int256 variables and fails on overflow.
+
+     */
+/**
+
+     * @dev Subtracts two int256 variables and fails on overflow.
+
+     */
+/**
+
+     * @dev Adds two int256 variables and fails on overflow.
+
+     */
+/**
+
+     * @dev Converts to absolute value, and fails on overflow.
+
+     */
+/******************/
+// SPDX-License-Identifier: MIT
+//www.cimbo.org
+//t.me/cimbo_token
+//twitter.com/Cimbotoken
+//www.cimbo.org/images/whitepaper.pdf
+// Gas optimization: this is cheaper than requiring     not being zero, but the
+// benefit is lost if     is also tested.
+// See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
+// assert(a == b * c + a % b); // There is no case in which this doesn                                                                                                                                                                                                                               s `%` operator. This function uses a `revert`
+//github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+// Detect overflow when multiplying MIN_INT256 with -1
+// Prevent overflow when dividing MIN_INT256 by -1
+// Solidity already throws when dividing by 0.
+// Anti-bot and anti-whale mappings and variables
+// if any account belongs to _isExcludedFromFee account then remove the fee
+// only take fees on buys/sells, do not take on wallet transfers
+// on sell
+// on buy

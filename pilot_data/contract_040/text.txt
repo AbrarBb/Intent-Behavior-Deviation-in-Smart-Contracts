@@ -1,0 +1,3 @@
+// every address can only win once, obviously
+// 1 in 8 chance
+// DEBUG, DELETE BEFORE DEPLOYMENT!!

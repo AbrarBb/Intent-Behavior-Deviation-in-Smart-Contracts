@@ -1,0 +1,24 @@
+/// @title Interface for contracts conforming to ERC-721: Non-Fungible Tokens
+/// @author Dieter Shirley <dete@axiomzen.co> (https://github.com/dete)
+// This contract only defines a modifier but does not use
+// it - it will be used in derived contracts.
+// The function body is inserted where the special symbol
+//      in the definition of a modifier appears.
+// This means that if the owner calls this function, the
+// function is executed and otherwise, an exception is
+// thrown.
+// Required methods
+// Events
+// Optional
+// function name() public view returns (string name);
+// function symbol() public view returns (string symbol);
+// function tokensOfOwner(address _owner) external view returns (uint256[] tokenIds);
+// function tokenMetadata(uint256 _tokenId, string _preferredTransport) public view returns (string infoUrl);
+// ERC-165 Compatibility (https://github.com/ethereum/EIPs/issues/165)
+// this is the fallback function; it is called whenever the contract receives ether
+// forward that ether onto the contract owner immediately
+// and emit the EtherReceived event in case anyone is watching it
+// this can be called by anyone (who wants to pay for gas), but that                                                                  s account. it sweeps the entire ether balance
+// this can only be called by the owner. it sends some amount of an ERC-20 token to some address
+// like sweep(), this can be called by anyone. it sweeps the full balance of an ERC-20 token to the owner's account
+// for cryptokitties etc
