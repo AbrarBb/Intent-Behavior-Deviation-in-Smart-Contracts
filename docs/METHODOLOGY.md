@@ -262,11 +262,12 @@ Addresses **Random Forest mean decrease in impurity (MDI)** bias: per-feature im
 **Interpretation for Q1 writing.**
 
 - If **Behavior-Only** underperforms **Intent-Only** but you still claim a **hybrid** contribution, argue **complementarity** (different error modes), **robustness checks**, or **pilot human labels**—not raw MDI shares alone.  
-- If **Hybrid** ≈ **Intent-Only** on F1, state explicitly: behavior features add **limited lift** under current weak labels and sparse Slither columns in the full build—then tighten behavior with Slither-on-subset or richer static features.
+- If **Hybrid** ≈ **Intent-Only** on F1, state whether **behavior-only** is also strong: if Slither (and regex) are populated, behavior-only can approach intent-only **in ablation** while **hybrid** still shows little F1 lift—then frame hybrid as **optional robustness** or **redundancy**, not guaranteed gain.
+- If **Behavior-Only** underperforms **Intent-Only** (e.g. regex-only build with Slither columns zero-filled), do not over-claim hybrid gains until static analysis is fixed.
 
-### Example replication snapshot (replace after any data refresh)
+### Example snapshots (replace after any data refresh)
 
-The table below is **one** run of [`15_ablation_study.py`](../15_ablation_study.py) on the authors’ local `artifacts/ml_dataset_verified_full.csv` (2026-04-03). **Re-run the script** after regenerating the CSV and paste updated figures into the paper; do not treat these as fixed constants across environments.
+**A) Regex-only behavior block (Slither columns all-zero in CSV).** Illustrative older build when [`12_build_verified_full_ml_dataset.py`](../12_build_verified_full_ml_dataset.py) did not run Slither on the full corpus:
 
 | Model | Mean F1 (rugpull) | Mean ROC-AUC |
 | --- | ---: | ---: |
@@ -274,9 +275,17 @@ The table below is **one** run of [`15_ablation_study.py`](../15_ablation_study.
 | Behavior-Only | 0.6945 | 0.7628 |
 | Hybrid (Proposed) | 0.9846 | 0.9954 |
 
-**Hybrid vs Intent-Only (mean F1):** about **−0.07%** relative (hybrid slightly below intent-only in this snapshot). **Mean ROC-AUC** was **+0.02%** relative—useful as a secondary ranking metric, not a substitute for reporting F1/practical error tradeoffs.
+**B) Slither-enabled verified-full (Stage 2, `12` with `--enable-slither`, pragma-aware solc chains).** One run of [`15_ablation_study.py`](../15_ablation_study.py) on `artifacts/ml_dataset_verified_full.csv` (N=3324, **2026-04-09**). Config: **Slither OK 3095 / 3324 (93.1%)**, failed 229.
 
-**Reading this snapshot:** Behavior-only lags intent-only strongly; hybrid matches intent-only within fold noise, which aligns with the §12.4 narrative (embedding-dominant setup; sparse behavior signal at full scale).
+| Model | Mean F1 (rugpull) | Mean ROC-AUC |
+| --- | ---: | ---: |
+| Intent-Only | 0.9852 | 0.9952 |
+| Behavior-Only | 0.9531 | 0.9640 |
+| Hybrid (Proposed) | 0.9848 | 0.9951 |
+
+**Hybrid vs Intent-Only (mean F1, snapshot B):** about **−0.04%** relative. **Mean ROC-AUC:** about **−0.01%** relative.
+
+**Reading snapshot B:** Behavior-only is **much** stronger than in A (Slither + regex signal). Hybrid F1 remains within noise of intent-only—embeddings still set the ceiling; combined behavior does not beat intent under this RF+CV setup. Report **both** formal ablation (primary) and Slither coverage (e.g. from `artifacts/ml_dataset_verified_full_config.json` or [`tools/post_stage2_diagnostics.py`](../tools/post_stage2_diagnostics.py)).
 
 ---
 
@@ -295,40 +304,40 @@ Retrains a **random forest** (`n_estimators=100`, `class_weight='balanced'`, `ra
 
 ### Example replication snapshot ([`14_feature_importance.py`](../14_feature_importance.py))
 
-One run on the authors’ local `artifacts/ml_dataset_verified_full.csv` (2026-04-03), **single** RF fit on all rows (not cross-validated). **Re-run** after regenerating the CSV; numbers are **illustrative** only.
+**Slither-enabled** `artifacts/ml_dataset_verified_full.csv` (same build as §12.4 snapshot B), **single** RF fit on all rows (not cross-validated). **Re-run** after regenerating the CSV.
 
 **Top 20 features** (MDI; identical hyperparameters as §13.1):
 
 | feature | importance |
 | --- | ---: |
-| emb_125 | 0.069533 |
-| emb_337 | 0.040080 |
-| emb_193 | 0.038108 |
-| emb_212 | 0.035075 |
-| emb_313 | 0.034841 |
-| emb_242 | 0.030957 |
-| emb_378 | 0.030703 |
-| emb_237 | 0.028058 |
-| emb_066 | 0.026943 |
-| emb_219 | 0.023234 |
-| emb_321 | 0.022238 |
-| emb_329 | 0.019552 |
-| emb_139 | 0.018750 |
-| emb_159 | 0.018697 |
-| emb_095 | 0.018322 |
-| emb_372 | 0.015068 |
-| emb_170 | 0.013642 |
-| emb_293 | 0.013613 |
-| emb_349 | 0.013129 |
-| emb_343 | 0.013063 |
+| emb_125 | 0.074339 |
+| emb_313 | 0.048154 |
+| emb_212 | 0.041417 |
+| emb_337 | 0.040763 |
+| emb_193 | 0.034426 |
+| emb_066 | 0.025801 |
+| emb_219 | 0.024694 |
+| emb_237 | 0.023027 |
+| emb_378 | 0.020470 |
+| emb_349 | 0.019801 |
+| emb_159 | 0.019687 |
+| emb_139 | 0.019340 |
+| emb_095 | 0.018308 |
+| emb_343 | 0.017868 |
+| emb_321 | 0.016187 |
+| emb_364 | 0.014089 |
+| emb_372 | 0.013777 |
+| emb_329 | 0.013526 |
+| emb_157 | 0.012924 |
+| emb_280 | 0.011944 |
 
 **Aggregated pillar split** (percent of Intent + Behavior importance mass):
 
-- **Total NLP Intent (all `emb_*`):** 99.90% (raw sum 0.999043)  
-- **Total Static Behavior (14 columns):** 0.10% (raw sum 0.000957)  
+- **Total NLP Intent (all `emb_*`):** 99.82% (raw sum 0.998161)  
+- **Total Static Behavior (14 columns):** 0.18% (raw sum 0.001839)  
 - sklearn importances **sum to 1.0** over all 398 features.
 
-**Reading this snapshot:** Every feature in the top 20 is an embedding dimension; the behavior block’s combined MDI is a **tiny** share—consistent with §13.1’s bias warning and with §12.4 (ablation), where **intent dominates** discriminative power in this build.
+**Reading this snapshot:** Top-20 MDI ranks remain **embedding-only**—expected under MDI bias (§13.1). That contrasts with **formal ablation** (§12.4 B), where **behavior-only F1 is high** once Slither columns are non-zero. **Do not** let MDI alone overturn ablation: present **both**.
 
 ### 13.2 Pairing with §12.4 in the Results section
 
@@ -367,7 +376,8 @@ python 06_extract_behavior_features.py
 python 07_build_ml_dataset.py
 python 08_train_models.py
 python 11_run_ablation_experiments.py
-# large-scale verified full:
+# large-scale verified full (example: Slither + PATH to solc-select Scripts on Windows):
+# python 12_build_verified_full_ml_dataset.py --enable-slither --slither-skip-solc-install --slither-timeout 180
 python 12_build_verified_full_ml_dataset.py
 python 13_train_verified_full_models.py
 python 14_feature_importance.py
@@ -380,11 +390,11 @@ python 15_ablation_study.py
 
 1. **Data:** master size, verified count, class distribution **before/after** verification ([`COHORT_TABLES.md`](COHORT_TABLES.md)).  
 2. **Intent:** model name, dimension 384, extraction rules (§9).  
-3. **Behavior:** list the 14 features; state whether Slither was run or zeros (§10).  
+3. **Behavior:** list the 14 features; report **Slither run** vs zero-filled baseline; if full-corpus Slither, cite **coverage** (e.g. ok/fail from `ml_dataset_verified_full_config.json`) and solc/pragma handling (§10, `12_build_verified_full_ml_dataset.py`).  
 4. **ML:** train/test split, seeds, models, metrics (P/R/F1); **formal verified-full ablation** (§12.4, [`15_ablation_study.py`](../15_ablation_study.py)) with pilot ablations (§12.3) as optional.  
 5. **Interpretability:** **MDI** importances (§13.1) **paired with** formal ablation (§12.4)—do not rely on MDI alone.  
 6. **Honesty:** weak labels vs pilot human labels; verification bias (§7, [`THREATS_TO_VALIDITY.md`](THREATS_TO_VALIDITY.md)).
 
 ---
 
-*Last updated to match repository scripts and docs layout. Regenerate cohort numbers after any data refresh.*
+*Last updated: post–Stage 2 Slither verified-full (2026-04-09). Regenerate cohort/ablation numbers after any data refresh.*

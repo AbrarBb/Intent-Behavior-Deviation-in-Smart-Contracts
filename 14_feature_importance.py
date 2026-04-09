@@ -8,6 +8,7 @@ reports Top 20 features and aggregate Intent (embeddings) vs Behavior shares.
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 
 import numpy as np
@@ -17,8 +18,8 @@ from sklearn.ensemble import RandomForestClassifier
 SCRIPT_DIR = Path(__file__).resolve().parent
 DEFAULT_CSV = SCRIPT_DIR / "artifacts" / "ml_dataset_verified_full.csv"
 
-# Must match column order in ``12_build_verified_full_ml_dataset.py`` / CSV tail.
-BEHAVIOR_COLS = [
+# Default if ``ml_dataset_verified_full_config.json`` has no ``feature_cols``.
+BEHAVIOR_COLS_FALLBACK = [
     "owner_withdraw",
     "emergency_withdraw",
     "unrestricted_mint",
@@ -34,6 +35,19 @@ BEHAVIOR_COLS = [
     "slither_delegatecall_loop",
     "slither_ownerish_any",
 ]
+
+
+def _behavior_columns_for_csv(csv_path: Path) -> list[str]:
+    cfg_path = csv_path.parent / f"{csv_path.stem}_config.json"
+    if cfg_path.is_file():
+        try:
+            data = json.loads(cfg_path.read_text(encoding="utf-8"))
+            cols = data.get("feature_cols")
+            if isinstance(cols, list) and cols and all(isinstance(c, str) for c in cols):
+                return cols
+        except (OSError, json.JSONDecodeError):
+            pass
+    return list(BEHAVIOR_COLS_FALLBACK)
 
 
 def _emb_columns(df: pd.DataFrame) -> list[str]:
@@ -57,12 +71,13 @@ def main() -> None:
     if len(emb_cols) != 384:
         raise SystemExit(f"Expected 384 emb_* columns, found {len(emb_cols)}")
 
-    missing = [c for c in BEHAVIOR_COLS if c not in df.columns]
+    behavior_cols = _behavior_columns_for_csv(args.csv)
+    missing = [c for c in behavior_cols if c not in df.columns]
     if missing:
         raise SystemExit(f"Missing behavior columns: {missing}")
 
     y = df["target"].astype(int).to_numpy()
-    X = df[emb_cols + BEHAVIOR_COLS].to_numpy(dtype=np.float32)
+    X = df[emb_cols + behavior_cols].to_numpy(dtype=np.float32)
 
     clf = RandomForestClassifier(
         n_estimators=100,
@@ -72,7 +87,7 @@ def main() -> None:
     )
     clf.fit(X, y)
 
-    names = emb_cols + BEHAVIOR_COLS
+    names = emb_cols + behavior_cols
     imp = pd.DataFrame({"feature": names, "importance": clf.feature_importances_})
     imp = imp.sort_values("importance", ascending=False).reset_index(drop=True)
 
@@ -83,7 +98,7 @@ def main() -> None:
     print()
 
     mask_emb = imp["feature"].str.startswith("emb_")
-    mask_beh = imp["feature"].isin(BEHAVIOR_COLS)
+    mask_beh = imp["feature"].isin(behavior_cols)
 
     total_nlp = float(imp.loc[mask_emb, "importance"].sum())
     total_beh = float(imp.loc[mask_beh, "importance"].sum())

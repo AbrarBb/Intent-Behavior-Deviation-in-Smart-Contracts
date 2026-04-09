@@ -4,8 +4,8 @@ Formal ablation study on verified-full data (addresses MDI importance bias narra
 
 Trains RandomForest with stratified 5-fold CV on:
   - Intent-only (384 emb_*)
-  - Behavior-only (14 tabular features)
-  - Hybrid (398 = intent + behavior)
+  - Behavior-only (tabular features; 14 default, or ``feature_cols`` from build config)
+  - Hybrid (384 + len(behavior))
 
 Reports mean F1 (positive class = rugpull) and mean ROC-AUC per setting.
 """
@@ -13,6 +13,7 @@ Reports mean F1 (positive class = rugpull) and mean ROC-AUC per setting.
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 
 import numpy as np
@@ -24,7 +25,7 @@ from sklearn.model_selection import StratifiedKFold
 SCRIPT_DIR = Path(__file__).resolve().parent
 DEFAULT_CSV = SCRIPT_DIR / "artifacts" / "ml_dataset_verified_full.csv"
 
-BEHAVIOR_COLS = [
+BEHAVIOR_COLS_FALLBACK = [
     "owner_withdraw",
     "emergency_withdraw",
     "unrestricted_mint",
@@ -40,6 +41,20 @@ BEHAVIOR_COLS = [
     "slither_delegatecall_loop",
     "slither_ownerish_any",
 ]
+
+
+def _behavior_columns_for_csv(csv_path: Path) -> list[str]:
+    cfg_path = csv_path.parent / f"{csv_path.stem}_config.json"
+    if cfg_path.is_file():
+        try:
+            data = json.loads(cfg_path.read_text(encoding="utf-8"))
+            cols = data.get("feature_cols")
+            if isinstance(cols, list) and cols and all(isinstance(c, str) for c in cols):
+                return cols
+        except (OSError, json.JSONDecodeError):
+            pass
+    return list(BEHAVIOR_COLS_FALLBACK)
+
 
 RANDOM_STATE = 42
 N_SPLITS = 5
@@ -93,13 +108,14 @@ def main() -> None:
     if len(emb_cols) != 384:
         raise SystemExit(f"Expected 384 emb_* columns, found {len(emb_cols)}")
 
-    missing = [c for c in BEHAVIOR_COLS if c not in df.columns]
+    behavior_cols = _behavior_columns_for_csv(args.csv)
+    missing = [c for c in behavior_cols if c not in df.columns]
     if missing:
         raise SystemExit(f"Missing behavior columns: {missing}")
 
     y = df["target"].astype(int).to_numpy()
     X_intent = df[emb_cols].to_numpy(dtype=np.float32)
-    X_behavior = df[BEHAVIOR_COLS].to_numpy(dtype=np.float32)
+    X_behavior = df[behavior_cols].to_numpy(dtype=np.float32)
     X_hybrid = np.hstack([X_intent, X_behavior]).astype(np.float32)
 
     base_clf = lambda: RandomForestClassifier(
@@ -132,6 +148,7 @@ def main() -> None:
     print(f"- **Classifier:** `RandomForestClassifier(n_estimators=100, class_weight='balanced', random_state={RANDOM_STATE})`")
     print(f"- **CV:** `StratifiedKFold(n_splits={N_SPLITS}, shuffle=True, random_state={RANDOM_STATE})`")
     print(f"- **Positive class:** {POS_LABEL} (rugpull)")
+    print(f"- **Behavior columns:** {len(behavior_cols)} (from build config if present)")
     print()
     print("| Model | Mean F1 (rugpull) | Mean ROC-AUC |")
     print("|---|---:|---:|")

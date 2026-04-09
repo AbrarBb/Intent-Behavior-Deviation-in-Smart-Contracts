@@ -1,0 +1,69 @@
+﻿================================================================================
+ERROR ANALYSIS: MODALITY DISAGREEMENT (5-fold CV, threshold 0.5)
+================================================================================
+Dataset: ml_dataset_verified_full.csv
+Positive class (rugpull): 2302 | Negative (safe): 1022
+
+FALSE NEGATIVES (predicted safe, actual rugpull)
+--------------------------------------------------------------------------------
+Both modalities miss:             0  (  0.0% of union FN |   0.0% of all rugpulls)
+Only intent misses:               6  (  8.2% of union FN |   0.3% of all rugpulls)
+Only behavior misses:            67  ( 91.8% of union FN |   2.9% of all rugpulls)
+Total unique FN (union):         73
+
+FALSE POSITIVES (predicted rugpull, actual safe)
+--------------------------------------------------------------------------------
+Both modalities flag:            54  ( 33.5% of union FP |   5.3% of all safe)
+Only intent flags:                8  (  5.0% of union FP |   0.8% of all safe)
+Only behavior flags:             99  ( 61.5% of union FP |   9.7% of all safe)
+Total unique FP (union):        161
+
+COMPLEMENTARITY (FN union)
+--------------------------------------------------------------------------------
+Share of union FN where BOTH miss: 0.0%
+Interpretation: lower overlap -> each modality misses different rugpulls (complementarity).
+
+Sample addresses (first 5 per category, FN):
+  Both miss:          []
+  Only intent misses: ['0x2bba3cf6de6058cc1b4457ce00deb359e2703d7f', '0x650e3e3feab7736181b1a23953f3af6c0462e5f4', '0x93c564d4cc593867daae181eb3b494a2362b1ec5', '0x765f0c16d1ddc279295c1a7c24b0883f62d33f75', '0xf4134146af2d511dd5ea8cdb1c4ac88c57d60404']
+  Only behavior miss: ['0x9e7ce36dbd1a9a6c6e80d08e38077745855edd3a', '0xeac8976401037b0f1a706d915285d442423b9b3c', '0x8a36f3e0da7b36fd22fcf2844c21e812279372ac', '0x75041597d8f6e869092d78b9814b7bcdeeb393b4', '0x67fe8dbf5ed0aa9d7a127e5e061d715a1eff3712']
+
+================================================================================
+BEHAVIOR-ONLY FEATURE IMPORTANCE (MDI, full fit)
+================================================================================
+Top 10:
+   1. slither_ownerish_any                       0.214052
+   2. owner_withdraw                             0.208801
+   3. slither_high_count                         0.195573
+   4. slither_controlled_delegatecall            0.126325
+   5. regex_unrestricted_mint                    0.086746
+   6. unrestricted_mint                          0.061077
+   7. slither_unchecked_lowlevel                 0.053678
+   8. slither_arbitrary_send                     0.016155
+   9. regex_owner_withdraw                       0.013473
+  10. emergency_withdraw                         0.008798
+
+Aggregate MDI mass (behavior block)
+--------------------------------------------------------------------------------
+  slither_* :      61.4%
+  regex_* :        10.7%
+  heuristics:      27.9%  (owner_withdraw, emergency_withdraw, unrestricted_mint)
+
+================================================================================
+ENRICHMENT PREVIEW: ml_dataset_verified_full_enrich_preview_100.csv (n=100)
+================================================================================
+  approve_restricted_to_owner                   0.00%  (0/100)
+  transfer_restricted                           0.00%  (0/100)
+  burn_restricted                               1.00%  (1/100)
+  liquidity_removal_guarded                     0.00%  (0/100)
+  unguarded_public_state_mutation               2.00%  (2/100)
+  owner_hardcoded                               0.00%  (0/100)
+  has_selfdestruct_or_delegatecall             30.00%  (30/100)
+  asymmetric_liquidity_flow                     2.00%  (2/100)
+  has_fallback                                  8.00%  (8/100)
+  liquidity_asymmetric_no_remove                4.00%  (4/100)
+
+Mean non-zero rate (listed columns): 4.70%
+--------------------------------------------------------------------------------
+Note: sparse activation on this sample; enrichment may be low-yield for lift.
+

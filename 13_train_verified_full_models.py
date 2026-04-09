@@ -9,6 +9,7 @@ but loads `artifacts/ml_dataset_verified_full.npz`.
 
 from __future__ import annotations
 
+import argparse
 from pathlib import Path
 
 import joblib
@@ -24,14 +25,23 @@ from sklearn.svm import LinearSVC
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 ARTIFACTS = SCRIPT_DIR / "artifacts"
-DATA = ARTIFACTS / "ml_dataset_verified_full.npz"
+DEFAULT_NPZ = ARTIFACTS / "ml_dataset_verified_full.npz"
 
 
 def main() -> None:
-    if not DATA.is_file():
-        raise SystemExit("Run 12_build_verified_full_ml_dataset.py first.")
+    ap = argparse.ArgumentParser()
+    ap.add_argument(
+        "--npz",
+        type=Path,
+        default=DEFAULT_NPZ,
+        help="Path to verified-full NPZ (default: artifacts/ml_dataset_verified_full.npz).",
+    )
+    args = ap.parse_args()
+    data_path = args.npz.resolve()
+    if not data_path.is_file():
+        raise SystemExit(f"NPZ not found: {data_path}. Run 12_build_verified_full_ml_dataset.py first.")
 
-    pack = np.load(DATA, allow_pickle=True)
+    pack = np.load(data_path, allow_pickle=True)
     X = pack["X"]
     y = pack["y"]
 
@@ -80,6 +90,7 @@ def main() -> None:
 
     print("=" * 60)
     print("Verified-source full hold-out evaluation (rugpull = positive class)")
+    print(f"Data: {data_path}")
     print("=" * 60)
 
     best_name = None

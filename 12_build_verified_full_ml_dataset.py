@@ -14,11 +14,17 @@ This script creates ONE training dataset by:
   2) Extracting intent text from each Solidity source file (NatSpec/comments).
   3) Computing Sentence-BERT embeddings for intent text.
   4) Extracting behavior features via regex heuristics (fast, always works).
-     Slither detector columns are included but set to 0 by default because
-     full Slither runs over thousands of contracts are expensive.
-     (If you later enable Slither, keep the same column schema.)
+     With ``--enable-slither``, Slither runs per file using ``--solc-solcs-select``:
+     exact pragma chains (e.g. 0.8.13 → 0.8.13, 0.8.20, 0.8.28) then line fallbacks
+     (0.4.26 … 0.8.28). Extra 0.8.x compilers are installed via solc-select when needed.
+     On first run, ``solc-select install`` is invoked for those versions unless
+     ``--slither-skip-solc-install`` is passed. The pip ``Scripts`` directory is
+     prepended to PATH so ``solc`` resolves.
+     Optional ``--enable-enriched-features`` appends regex heuristics from
+     ``06b_extract_enriched_behavior_features.py`` to the behavior vector.
   5) Creating `X = [intent_embedding | behavior_features]` and `y = label`.
-  6) Saving:
+  6) Saving (default stem ``ml_dataset_verified_full.*``; use ``--output-tag`` for
+     smoke tests so you do not overwrite a finished Stage-2 corpus):
        - `artifacts/ml_dataset_verified_full.npz` (primary, for training)
        - `artifacts/ml_dataset_verified_full.csv` (inspection / Kaggle-style)
 
@@ -28,6 +34,7 @@ Outputs are ignored by git because `artifacts/` is excluded in `.gitignore`.
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import os
 import re
@@ -49,8 +56,8 @@ ARTIFACTS_DIR = SCRIPT_DIR / "artifacts"
 MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
 EMB_DIM = 384
 
-# Must match the training feature ordering in `07_build_ml_dataset.py`.
-FEATURE_COLS = [
+# Base tabular behavior block (regex + Slither schema); must match `07_build_ml_dataset.py`.
+BASE_FEATURE_COLS = [
     "owner_withdraw",
     "emergency_withdraw",
     "unrestricted_mint",
@@ -66,6 +73,29 @@ FEATURE_COLS = [
     "slither_delegatecall_loop",
     "slither_ownerish_any",
 ]
+
+
+def _sanitize_output_tag(raw: str | None) -> str | None:
+    """Allow only safe filename tokens; return None to use default stem."""
+    if raw is None or not str(raw).strip():
+        return None
+    t = re.sub(r"[^a-zA-Z0-9_-]+", "_", str(raw).strip()).strip("_")
+    if not t:
+        return None
+    return t[:64]
+
+
+def _load_enriched_behavior_module():
+    """Load ``06b_extract_enriched_behavior_features.py`` (filename not importable as a package)."""
+    path = SCRIPT_DIR / "06b_extract_enriched_behavior_features.py"
+    if not path.is_file():
+        raise SystemExit(f"Missing {path.name} (required for --enable-enriched-features).")
+    spec = importlib.util.spec_from_file_location("enriched_behavior_features", path)
+    if spec is None or spec.loader is None:
+        raise SystemExit("Could not load enriched behavior module.")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 SLITHER_OWNERISH = frozenset(
@@ -86,9 +116,25 @@ SOLC_LINE_TO_VERSION = {
     5: "0.5.17",
     6: "0.6.12",
     7: "0.7.6",
-    8: "0.8.28",
+    8: "0.8.28",  # default fallback for unknown 0.8.x
 }
-SOLC_VERSIONS_FOR_INSTALL: tuple[str, ...] = tuple(SOLC_LINE_TO_VERSION.values())
+
+# Exact ``X.Y.Z`` pragmas: try these first (left = highest priority), then line-based fallbacks.
+PRAGMA_SOLC_CHAINS: dict[str, list[str]] = {
+    "0.8.13": ["0.8.13", "0.8.20", "0.8.28"],
+    "0.8.20": ["0.8.20", "0.8.28"],
+    "0.8.0": ["0.8.28", "0.8.20", "0.8.13"],  # e.g. ^0.8.0
+}
+
+
+def _merged_solc_versions_for_install() -> tuple[str, ...]:
+    s: set[str] = set(SOLC_LINE_TO_VERSION.values())
+    for chain in PRAGMA_SOLC_CHAINS.values():
+        s.update(chain)
+    return tuple(sorted(s, key=lambda v: tuple(int(x) for x in v.split("."))))
+
+
+SOLC_VERSIONS_FOR_INSTALL: tuple[str, ...] = _merged_solc_versions_for_install()
 
 PRAGMA_SOLIDITY_RE = re.compile(
     r"pragma\s+solidity\s+([^;]+);",
@@ -140,8 +186,8 @@ def infer_solc_minor_line(spec: str | None) -> int:
     return 8
 
 
-def build_solc_solcs_select_arg(prag_spec: str | None) -> str:
-    """Comma-separated list for Slither ``--solc-solcs-select`` (try pragma line first)."""
+def _line_ordered_solc_versions(prag_spec: str | None) -> list[str]:
+    """Line-based order (one compiler per 0.4–0.8 line), pragma minor first."""
     line = infer_solc_minor_line(prag_spec)
     upward = list(range(line, 9))
     downward = list(range(line - 1, 3, -1))
@@ -153,7 +199,36 @@ def build_solc_solcs_select_arg(prag_spec: str | None) -> str:
         if ver and ver not in seen:
             seen.add(ver)
             out.append(ver)
-    return ",".join(out)
+    return out
+
+
+def infer_solc_chain(prag_spec: str | None) -> list[str]:
+    """Ordered solc versions: pragma-specific chain first, then line-based fallbacks (deduped)."""
+    seen: set[str] = set()
+    ordered: list[str] = []
+
+    def add(v: str) -> None:
+        if v not in seen:
+            seen.add(v)
+            ordered.append(v)
+
+    if prag_spec:
+        for m in re.finditer(r"\b(0\.\d+\.\d+)\b", prag_spec):
+            key = m.group(1)
+            if key in PRAGMA_SOLC_CHAINS:
+                for v in PRAGMA_SOLC_CHAINS[key]:
+                    add(v)
+                break
+
+    for v in _line_ordered_solc_versions(prag_spec):
+        add(v)
+
+    return ordered
+
+
+def build_solc_solcs_select_arg(prag_spec: str | None) -> str:
+    """Comma-separated list for Slither ``--solc-solcs-select``."""
+    return ",".join(infer_solc_chain(prag_spec))
 
 
 def _solc_select_cmd() -> list[str] | None:
@@ -185,7 +260,8 @@ def ensure_solc_versions_installed(versions: tuple[str, ...], timeout_s: int = 6
                 timeout=timeout_s,
             )
             if r.returncode == 0:
-                print(r.stdout.strip(), flush=True) if r.stdout else None
+                if r.stdout and r.stdout.strip():
+                    print(r.stdout.strip(), flush=True)
             else:
                 tail = (r.stderr or r.stdout or "")[-500:]
                 print(f"[solc-select install {ver}] failed: {tail!s}", flush=True)
@@ -250,6 +326,7 @@ def run_slither_json(
     except json.JSONDecodeError as exc:
         return None, f"json_decode:{exc}"
 
+    # Slither often exits non-zero when detectors report findings; JSON is still valid.
     return data, None
 
 
@@ -309,7 +386,38 @@ def main() -> None:
         action="store_true",
         help="Do not run solc-select install (assumes solc versions are already installed).",
     )
+    ap.add_argument(
+        "--max-contracts",
+        type=int,
+        default=0,
+        help="If >0, only the first N rows of the manifest are processed (smoke test / Stage 1).",
+    )
+    ap.add_argument(
+        "--enable-enriched-features",
+        action="store_true",
+        help="Append heuristic columns from 06b_extract_enriched_behavior_features.py to behavior block.",
+    )
+    ap.add_argument(
+        "--output-tag",
+        type=str,
+        default="",
+        help="Write artifacts/ml_dataset_verified_full_<tag>.* instead of default stem (avoids overwriting full builds).",
+    )
     args = ap.parse_args()
+
+    _ot = (args.output_tag or "").strip()
+    _tag = _sanitize_output_tag(_ot) if _ot else None
+    output_stem = "ml_dataset_verified_full" + (f"_{_tag}" if _tag else "")
+    if _tag:
+        print(
+            f"Output stem: {output_stem} (use default stem for canonical Stage 2 / paper artifacts)",
+            flush=True,
+        )
+
+    enriched_mod = _load_enriched_behavior_module() if args.enable_enriched_features else None
+    feature_cols: list[str] = list(BASE_FEATURE_COLS)
+    if args.enable_enriched_features:
+        feature_cols = list(BASE_FEATURE_COLS) + list(enriched_mod.ENRICHED_FEATURE_NAMES)
 
     if not MANIFEST_CSV.is_file():
         raise SystemExit(f"Missing {MANIFEST_CSV.name}. Run 10_verified_source_cohorts.py first.")
@@ -322,6 +430,10 @@ def main() -> None:
     for col in ["address", "label", "sol_path"]:
         if col not in df.columns:
             raise SystemExit(f"verified_manifest.csv must include column: {col}")
+
+    if args.max_contracts and args.max_contracts > 0:
+        df = df.head(int(args.max_contracts)).copy()
+        print(f"Limiting to first {len(df)} manifest row(s) (--max-contracts).", flush=True)
 
     addresses = df["address"].astype(str).str.strip().tolist()
     labels = df["label"].astype(int).to_numpy()
@@ -343,10 +455,18 @@ def main() -> None:
             print("Skipping solc-select install (--slither-skip-solc-install).", flush=True)
     else:
         print("Slither mode: disabled (slither_* columns will be 0)", flush=True)
+    if args.enable_enriched_features:
+        print(
+            f"Enriched behavior features: enabled (+{len(enriched_mod.ENRICHED_FEATURE_NAMES)} columns)",
+            flush=True,
+        )
 
     # 1) Extract intent_text and behavior features.
     intent_texts: list[str] = []
     beh_rows: list[list[float]] = []
+    kept_labels: list[int] = []
+    kept_addresses: list[str] = []
+    kept_sol_paths: list[str] = []
     slither_ok_n = 0
     slither_fail_n = 0
 
@@ -403,25 +523,30 @@ def main() -> None:
         emergency_withdraw = int(rx["regex_emergency_withdraw"])
         unrestricted_mint = int(rx["regex_unrestricted_mint"])
 
-        beh_rows.append(
-            [
-                owner_withdraw,
-                emergency_withdraw,
-                unrestricted_mint,
-                int(rx["regex_owner_withdraw"]),
-                int(rx["regex_emergency_withdraw"]),
-                int(rx["regex_unrestricted_mint"]),
-                slither_ok,
-                sf["slither_high_count"],
-                sf["slither_arbitrary_send"],
-                sf["slither_suicidal"],
-                sf["slither_unchecked_lowlevel"],
-                sf["slither_controlled_delegatecall"],
-                sf["slither_delegatecall_loop"],
-                sf["slither_ownerish_any"],
-            ]
-        )
+        row = [
+            owner_withdraw,
+            emergency_withdraw,
+            unrestricted_mint,
+            int(rx["regex_owner_withdraw"]),
+            int(rx["regex_emergency_withdraw"]),
+            int(rx["regex_unrestricted_mint"]),
+            slither_ok,
+            sf["slither_high_count"],
+            sf["slither_arbitrary_send"],
+            sf["slither_suicidal"],
+            sf["slither_unchecked_lowlevel"],
+            sf["slither_controlled_delegatecall"],
+            sf["slither_delegatecall_loop"],
+            sf["slither_ownerish_any"],
+        ]
+        if args.enable_enriched_features:
+            assert enriched_mod is not None
+            row.extend(enriched_mod.extract_enriched_vector(src))
+        beh_rows.append(row)
         intent_texts.append(intent)
+        kept_labels.append(int(labels[i - 1]))
+        kept_addresses.append(addr)
+        kept_sol_paths.append(sol_rel)
 
         if i % 100 == 0:
             print(f"  extracted {i}/{n}")
@@ -431,9 +556,9 @@ def main() -> None:
         raise SystemExit("Internal mismatch: extracted intent_texts and behavior rows differ.")
 
     X_beh = np.asarray(beh_rows, dtype=np.float32)
-    y = labels[: len(intent_texts)].astype(np.int64)
-    cids = addresses[: len(intent_texts)]
-    sol_paths_kept = sol_paths[: len(intent_texts)]
+    y = np.asarray(kept_labels, dtype=np.int64)
+    cids = kept_addresses
+    sol_paths_kept = kept_sol_paths
 
     # 2) Embeddings.
     print("Computing Sentence-BERT embeddings...")
@@ -454,13 +579,13 @@ def main() -> None:
 
     # 3) Save artifacts.
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
-    npz_path = ARTIFACTS_DIR / "ml_dataset_verified_full.npz"
+    npz_path = ARTIFACTS_DIR / f"{output_stem}.npz"
     np.savez_compressed(
         npz_path,
         X=X,
         y=y,
         contract_id=np.asarray(cids, dtype=object),
-        feature_cols=np.asarray(FEATURE_COLS, dtype=object),
+        feature_cols=np.asarray(feature_cols, dtype=object),
         emb_dim=np.asarray([EMB_DIM], dtype=np.int64),
     )
 
@@ -473,9 +598,9 @@ def main() -> None:
             "sol_path": sol_paths_kept,
         }
     )
-    for idx, c in enumerate(FEATURE_COLS):
+    for idx, c in enumerate(feature_cols):
         meta[c] = X_beh[:, idx].astype(int)
-    meta_path = ARTIFACTS_DIR / "ml_dataset_verified_full_meta.csv"
+    meta_path = ARTIFACTS_DIR / f"{output_stem}_meta.csv"
     meta.to_csv(meta_path, index=False)
 
     print(f"Saved NPZ: {npz_path}")
@@ -487,7 +612,7 @@ def main() -> None:
         # Kaggle-style flat dataset: embedding columns + behavior + target.
         emb_cols = [f"emb_{i:03d}" for i in range(EMB_DIM)]
         emb_df = pd.DataFrame(emb, columns=emb_cols)
-        beh_df = pd.DataFrame(X_beh, columns=FEATURE_COLS)
+        beh_df = pd.DataFrame(X_beh, columns=feature_cols)
         out = pd.concat(
             [
                 meta[["address", "target", "target_label", "sol_path"]].reset_index(drop=True),
@@ -496,28 +621,37 @@ def main() -> None:
             ],
             axis=1,
         )
-        csv_path = ARTIFACTS_DIR / "ml_dataset_verified_full.csv"
+        csv_path = ARTIFACTS_DIR / f"{output_stem}.csv"
         out.to_csv(csv_path, index=False, float_format="%.6f")
         print(f"Saved full CSV: {csv_path} (columns={len(out.columns)})")
 
     # Save config for reproducibility.
-    cfg_path = ARTIFACTS_DIR / "ml_dataset_verified_full_config.json"
+    cfg_path = ARTIFACTS_DIR / f"{output_stem}_config.json"
     cfg_path.write_text(
         json.dumps(
             {
                 "manifest": MANIFEST_CSV.name,
+                "output_stem": output_stem,
                 "n_contracts": n,
                 "kept_contracts": len(cids),
+                "total_contracts": len(cids),
                 "embedding_model": MODEL_NAME,
                 "emb_dim": EMB_DIM,
                 "max_intent_chars": args.max_intent_chars,
                 "batch_size": args.batch_size,
                 "device": args.device,
-                "feature_cols": FEATURE_COLS,
+                "feature_cols": feature_cols,
+                "base_feature_cols": list(BASE_FEATURE_COLS),
+                "enriched_features_enabled": bool(args.enable_enriched_features),
                 "slither_enabled": bool(args.enable_slither),
                 "slither_timeout_sec": int(args.slither_timeout),
+                "slither_skip_solc_install": bool(args.slither_skip_solc_install),
+                "solc_select_versions": list(SOLC_VERSIONS_FOR_INSTALL),
+                "pragma_solc_chains": {k: v for k, v in PRAGMA_SOLC_CHAINS.items()},
                 "slither_ok_count": int(slither_ok_n),
                 "slither_fail_count": int(slither_fail_n),
+                "max_contracts_cap": int(args.max_contracts),
+                "output_tag": _tag or "",
             },
             indent=2,
         ),

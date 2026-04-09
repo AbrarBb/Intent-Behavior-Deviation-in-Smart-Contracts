@@ -130,59 +130,59 @@ The central research claim is not "NLP only" or "behavior only", but whether a *
 
 ## 5) Current Findings
 
-### 5.1 Formal verified-full ablation (from current run)
+### 5.1 Stage 2: Slither-enabled verified-full corpus
 
-From `15_ablation_study.py` on local `artifacts/ml_dataset_verified_full.csv`:
+Full-corpus build: [`12_build_verified_full_ml_dataset.py`](../12_build_verified_full_ml_dataset.py) with **`--enable-slither`**, pragma/solc-select chains, N=**3324** (see `artifacts/ml_dataset_verified_full_config.json`).
 
-- Intent-only: **F1 0.9852**, AUC **0.9952**
-- Behavior-only: **F1 0.6945**, AUC **0.7628**
-- Hybrid: **F1 0.9846**, AUC **0.9954**
-- Hybrid vs Intent-only (F1): **-0.07% relative**
+- **Slither OK:** **3095 / 3324 (93.1%)**
+- **Slither failed:** **229 (6.9%)** (version/remapping/compile edge cases)
 
-Interpretation:
+Non-zero Slither detector presence (full CSV) is non-trivial (e.g. `slither_high_count` ~45%, `slither_ownerish_any` ~34%, `slither_controlled_delegatecall` ~25%—run [`tools/post_stage2_diagnostics.py`](../tools/post_stage2_diagnostics.py) for the full table).
 
-- Behavior-only is much weaker than intent-only in the current full build.
-- Hybrid is almost identical to intent-only on F1, with tiny AUC gain.
-- This suggests behavior signal is currently limited at scale (likely sparse/noisy static block under present extraction conditions).
+### 5.2 Formal verified-full ablation (Slither-enabled CSV)
 
-### 5.2 Feature importance (MDI) snapshot
+From [`15_ablation_study.py`](../15_ablation_study.py) on `artifacts/ml_dataset_verified_full.csv` (**2026-04-09**):
 
-From `14_feature_importance.py` on same verified-full CSV:
+| Setting | Mean F1 (rugpull) | Mean ROC-AUC |
+| --- | ---: | ---: |
+| Intent-only | **0.9852** | 0.9952 |
+| Behavior-only | **0.9531** | 0.9640 |
+| Hybrid | **0.9848** | 0.9951 |
 
-- Top-ranked individual features are embedding dimensions.
-- Aggregate MDI share:
-  - Intent: **99.90%**
-  - Behavior: **0.10%**
+**Historical comparison (regex-only / Slither columns zero-filled):** behavior-only F1 was **~0.6945**; hybrid ~intent-only. After Stage 2, **behavior-only rises to ~0.95**—static analysis signal is real under ablation, even though **hybrid** still tracks **intent-only** on F1 (small negative vs intent).
 
 Interpretation:
 
-- MDI reflects embedding dominance in this setup, but this must not be interpreted as causal proof of security importance.
-- The ablation and MDI narratives are currently aligned: intent dominates measurable predictive utility in the present build.
+- **Ablation (primary):** With Slither populated, the **behavior block is strong** vs the old zero-filled baseline; intent remains at the **ceiling**; hybrid does not beat intent in this RF+CV setup.
+- Frame the paper around **modality analysis** (intent vs behavior vs hybrid) and **Slither coverage**, not “hybrid always wins on F1.”
 
-### 5.3 Practical conclusion right now
+### 5.3 Feature importance (MDI) snapshot (same Slither build)
 
-- The pipeline is operational and reproducible.
-- The present evidence supports a strong intent baseline and a weak behavior block contribution at full scale.
-- The hybrid claim should be framed as a **methodological framework** with current empirical lift constraints, not overstated as universal improvement.
+From [`14_feature_importance.py`](../14_feature_importance.py): top-20 features remain **embedding dimensions**; aggregate MDI mass is still **~99.8% intent / ~0.2% behavior**—consistent with MDI bias (many continuous embedding dims vs 14 tabular flags). **Pair MDI with §5.2 ablation**; do not cite MDI as proof that “behavior does not matter.”
+
+### 5.4 Practical conclusion
+
+- The pipeline is operational: full-corpus Slither + reproducible ablation + diagnostics ([`docs/STAGE2_WORKFLOW.md`](STAGE2_WORKFLOW.md)).
+- Evidence supports a **strong intent baseline**, a **strong behavior-only model after Slither**, and **hybrid ≈ intent** on F1 here—honest framing beats overstating hybrid lift.
 
 ---
 
 ## 6) Risks and Limitations (Current State)
 
-- Weak-label dependence in large-scale data can mute behavior effects.
-- Slither-derived columns may be sparse or incomplete across the full corpus.
+- Weak-label dependence in large-scale data; rug/safe lists are not contract-level audit truth.
+- **~7%** of contracts did not yield a successful Slither JSON (compile/remap/version issues)—failures are not random; consider reporting error buckets.
+- MDI still **understates** tabular contribution vs ablation; always cite formal modality ablation for “how much behavior helps.”
 - Verification filtering introduces selection bias.
-- High-performing intent embeddings may mask marginal behavior gains unless behavior extraction is improved.
+- Hybrid F1 may track intent when embeddings saturate; that does not negate behavior-only strength after Slither.
 
 ---
 
 ## 7) Next Phases (Recommended Roadmap)
 
-### Phase 1: Strengthen behavior signal quality
+### Phase 1: Optional enrichment and failure analysis
 
-- Re-run/expand Slither extraction coverage where feasible.
-- Add richer static features (access control patterns, value-flow proxies, temporal/fallback risk flags).
-- Validate behavior column completeness and non-zero rates before retraining.
+- Optional: [`06b_extract_enriched_behavior_features.py`](../06b_extract_enriched_behavior_features.py) + `--enable-enriched-features` on a **tagged** rebuild (do not overwrite canonical stem without backup).
+- Analyze Slither **failure** cases (229) for patterns; improve remappings / solc / multi-file project handling if needed.
 
 ### Phase 2: Tighten ground-truth quality
 
@@ -192,7 +192,7 @@ Interpretation:
 
 ### Phase 3: Evidence strengthening for paper
 
-- Recompute verified-full ablation after behavior improvements.
+- Report Stage 2 Slither coverage + ablation (§5) as primary quantitative block.
 - Add confidence intervals or fold variance reporting for main metrics.
 - Include targeted error analysis (false positives/false negatives by contract subgroup).
 
@@ -212,10 +212,10 @@ Interpretation:
 
 ## 8) Deliverables Status Snapshot
 
-- **Implemented scripts:** complete through formal ablation and feature-importance stages.
-- **Documentation package:** in place for methods, threats, reproducibility, and manuscript structure.
-- **Current strongest result:** verified-full ablation and model training pipeline reproducibility.
-- **Main gap to close:** improve behavior-feature strength/coverage to test true hybrid gains.
+- **Implemented scripts:** full-corpus Slither build, ablation, feature importance, diagnostics, backup workflow ([`STAGE2_WORKFLOW.md`](STAGE2_WORKFLOW.md)).
+- **Documentation package:** methods (`METHODOLOGY.md`), this report, cohort/threats/repro docs.
+- **Current quantitative story:** **93%** Slither success; **behavior-only F1 ~0.95** vs **~0.69** before Slither; hybrid ~intent; MDI still embedding-heavy—pair with ablation in the manuscript.
+- **Optional next step:** enrichment features + tagged rebuild; deeper analysis of Slither failures.
 
 ---
 

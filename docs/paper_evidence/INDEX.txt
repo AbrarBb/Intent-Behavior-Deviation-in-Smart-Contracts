@@ -1,0 +1,17 @@
+Paper evidence snapshot (Stage 2 Slither-enabled verified-full, 2026-04-09)
+
+Files:
+  post_stage2_diagnostics.txt   - Slither coverage + non-zero rates (from tools/post_stage2_diagnostics.py)
+  ablation_verified_full.txt    - Formal 5-fold ablation (from 15_ablation_study.py)
+  ml_dataset_verified_full_config.json - Copy of build config (slither_ok_count, feature_cols, etc.)
+  paper_diagnostic_bundle.txt   - Modality FN/FP disagreement + behavior MDI + enrichment preview (tools/paper_diagnostic_bundle.py)
+
+Canonical data remain under artifacts/ml_dataset_verified_full.*
+Backup copy: artifacts/stage2_slither_only_backup/
+
+Optional enrichment preview (does not touch canonical stem):
+  artifacts/ml_dataset_verified_full_enrich_preview_100.{csv,npz,*_meta.csv,*_config.json}
+  enrich_preview_100_diagnostics.txt - enrichment + Slither-zero baseline on first 100 manifest rows
+
+Regenerate after any rebuild: re-run post_stage2 + ablation; for disagreement/MDI/enrichment snapshot run:
+  python tools/paper_diagnostic_bundle.py
